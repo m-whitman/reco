@@ -1,0 +1,243 @@
+.sidebar {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 300px;
+  background: rgba(147, 112, 219, 0.05);
+  padding: 1rem;
+  overflow-y: auto;
+  border-left: 1px solid rgba(147, 112, 219, 0.2);
+  z-index: 15;
+  backdrop-filter: blur(8px);
+  margin-top: 71px;
+  padding-bottom: calc(1rem + 120px);
+  transition: transform 0.3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: 70vh;
+    top: auto;
+    bottom: 0;
+    border-left: none;
+    border-top: 1px solid rgba(147, 112, 219, 0.2);
+    border-radius: 20px 20px 0 0;
+    margin-top: 0;
+    transform: translateY(calc(100% - 50px));
+    display: none;
+  }
+
+  .sidebar.expanded {
+    transform: translateY(0);
+  }
+}
+
+.sidebarTitle {
+  color: #fff;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(147, 112, 219, 0.2);
+  font-size: 1.2rem;
+}
+
+.favoritesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.favoriteItem {
+  background: rgba(147, 112, 219, 0.15);
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.favoriteItem:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(147, 112, 219, 0.2);
+  background: rgba(147, 112, 219, 0.25);
+}
+
+.favoriteItem.playing {
+  background: rgba(29, 185, 84, 0.1);
+  box-shadow: 0 0 0 2px #1DB954;
+}
+
+.favoriteItem.playing:hover {
+  background: rgba(29, 185, 84, 0.2);
+  box-shadow: 0 4px 12px rgba(29, 185, 84, 0.2);
+}
+
+.imageContainer {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.thumbnail {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.sourceLink {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.sourceLink:hover {
+  transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.sourceIcon {
+  font-size: 14px;
+}
+
+.trackInfo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.trackName {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trackArtist {
+  color: #B8A7D9;
+  font-size: 0.8rem;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.playButton,
+.removeButton {
+  width: 28px;
+  height: 28px;
+  padding: 0.4rem;
+}
+
+.playButton.currentTrack {
+  color: #1DB954;
+}
+
+.playIcon.pauseIcon {
+  color: #1DB954;
+}
+
+.playButton,
+.removeButton {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.playButton {
+  color: #1DB954;
+}
+
+.playButton:hover {
+  background: rgba(29, 185, 84, 0.1);
+}
+
+.removeButton {
+  color: #ff4444;
+}
+
+.removeButton:hover {
+  background: rgba(255, 68, 68, 0.1);
+}
+
+.sourceTag {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.4rem;
+  background: #333;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.emptyMessage {
+  color: #888;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.playIcon,
+.pauseIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Add padding to main content to account for sidebar */
+:global(.container) {
+  padding-right: 320px;
+}
+
+.mobileHandle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobileHandle {
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: rgba(147, 112, 219, 0.3);
+    border-radius: 2px;
+    margin: 0 auto 1rem;
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 768px) {
+  .introText {
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+}

@@ -1,0 +1,177 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 128px);
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 0 0 2rem 0;
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.input {
+  padding: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.button {
+  padding: 0.75rem;
+  background-color: #8b5cf6;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.button:hover {
+  background-color: #7c3aed;
+}
+
+.buttonIcon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+}
+
+.historyContainer {
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 28rem;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
+}
+
+.historyTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 28rem;
+}
+
+.historyButton {
+  width: 100%;
+  text-align: center;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.historyButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.historyText {
+  flex: 1;
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    min-height: calc(100vh - 100px);
+    justify-content: flex-start;
+    padding-top: 2rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+    margin: 0 0 1.5rem 0;
+    padding: 0 1rem;
+  }
+
+  .formContainer {
+    padding: 0 1rem;
+  }
+
+  .input {
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+
+  .button {
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+
+  .historyContainer {
+    padding: 0 1rem;
+  }
+
+  .historyButton {
+    padding: 0.75rem;
+    border-radius: 8px;
+  }
+}
+
+.responsiveImage {
+  max-width: 600px;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .responsiveImage {
+    max-width: 500px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsiveImage {
+    max-width: 350px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+}
