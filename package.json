@@ -4,20 +4,33 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@radix-ui/react-slot": "^1.1.0",
+    "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "googleapis": "^144.0.0",
     "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
+    "lucide-react": "^0.447.0",
     "mongoose": "^8.7.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "spotify-web-api-node": "^5.0.2"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-youtube": "^10.1.0",
+    "soundcloud-searcher": "^0.3.1",
+    "spotify-web-api-node": "^5.0.2",
+    "youtube-search-without-api-key": "^2.0.1"
   }
 }
