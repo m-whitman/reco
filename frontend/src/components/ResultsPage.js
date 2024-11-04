@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "./Layout";
-import NavBar from "./NavBar";
 import AudioPlayer from "./AudioPlayer";
 import FavoritesSidebar from "./FavoritesSidebar";
 import TrackCard from "./TrackCard";
@@ -9,6 +8,13 @@ import { useAudio } from "./AudioContext";
 import styles from "./ResultsPage.module.css";
 
 function ResultsPage() {
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, []);
+
   const location = useLocation();
   const navigate = useNavigate();
   const { 
@@ -71,7 +77,6 @@ function ResultsPage() {
   if (error) {
     return (
       <Layout>
-        <NavBar />
         <div className={styles.container}>
           <h2 className={styles.title}>Error</h2>
           <p>{error}</p>
@@ -91,7 +96,6 @@ function ResultsPage() {
   if (!results) {
     return (
       <Layout>
-        <NavBar />
         <div className={styles.container}>
           <h2 className={styles.title}>No Results</h2>
           <p>No results found for "{query}"</p>
@@ -130,7 +134,6 @@ function ResultsPage() {
 
   return (
     <Layout>
-      <NavBar />
       <div className={styles.container}>
         <h2 className={styles.title}>Search Results for "{query}"</h2>
         
@@ -162,9 +165,8 @@ function ResultsPage() {
                 source="Spotify"
                 onPlay={handlePlay}
                 onToggleFavorite={toggleFavorite}
-                isFavorite={isFavorite(normalizedSpotifyTrack)}
-                isPlaying={isPlaying}
-                isCurrentTrack={currentSong?.id === normalizedSpotifyTrack.id}
+                isPlaying={isPlaying && currentSong?.id === normalizedSpotifyTrack.id}
+                isFavorite={isFavorite(normalizedSpotifyTrack.id)}
               />
             )}
             {normalizedYoutubeTrack && (
@@ -173,38 +175,28 @@ function ResultsPage() {
                 source="YouTube"
                 onPlay={handlePlay}
                 onToggleFavorite={toggleFavorite}
-                isFavorite={isFavorite(normalizedYoutubeTrack)}
-                isPlaying={isPlaying}
-                isCurrentTrack={currentSong?.id === normalizedYoutubeTrack.id}
+                isPlaying={isPlaying && currentSong?.id === normalizedYoutubeTrack.id}
+                isFavorite={isFavorite(normalizedYoutubeTrack.id)}
               />
             )}
           </div>
         </div>
 
         <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Recommendations</h3>
-          {mixedRecommendations.length === 0 ? (
-            <p className={styles.noResults}>No recommendations found</p>
-          ) : (
-            <div className={styles.grid}>
-              {mixedRecommendations.map((item, index) => {
-                const normalizedTrack = normalizeTrack(item.track, item.source);
-                
-                return (
-                  <TrackCard
-                    key={`${item.source.toLowerCase()}-${index}`}
-                    track={normalizedTrack}
-                    source={item.source}
-                    onPlay={handlePlay}
-                    onToggleFavorite={toggleFavorite}
-                    isFavorite={isFavorite(normalizedTrack)}
-                    isPlaying={isPlaying}
-                    isCurrentTrack={currentSong?.id === normalizedTrack.id}
-                  />
-                );
-              })}
-            </div>
-          )}
+          <h3 className={styles.sectionTitle}>Recommended Tracks</h3>
+          <div className={styles.grid}>
+            {mixedRecommendations.map(item => (
+              <TrackCard
+                key={`${item.source}-${item.track.id}`}
+                track={normalizeTrack(item.track, item.source)}
+                source={item.source}
+                onPlay={handlePlay}
+                onToggleFavorite={toggleFavorite}
+                isPlaying={isPlaying && currentSong?.id === item.track.id}
+                isFavorite={isFavorite(item.track.id)}
+              />
+            ))}
+          </div>
         </div>
       </div>
       <FavoritesSidebar 

@@ -1,15 +1,13 @@
 .container {
-  min-height: 100vh;
   background: #07013d;
   color: white;
-  width: 100%;
 }
 
 .main {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
-  padding-top: calc(71px + 2rem);
+  padding: 3rem;
+  padding-top: 120px;
 }
 
 .footer {
@@ -21,7 +19,6 @@
 @media (max-width: 768px) {
   .main {
     padding: 1rem;
-    padding-top: calc(71px + 1rem);
   }
   
   /* Hide the sidebar on mobile */

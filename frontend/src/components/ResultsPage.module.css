@@ -162,6 +162,7 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
+  scroll-margin-top: 100px;
 }
 
 .noResults {

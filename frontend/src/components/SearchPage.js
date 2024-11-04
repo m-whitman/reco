@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Search, Clock } from "lucide-react";
+import { Search, Clock, Loader } from "lucide-react";
 import Layout from "./Layout";
 import { useAudio } from "./AudioContext";
 import styles from "./SearchPage.module.css";
@@ -55,28 +55,39 @@ function SearchPage() {
               disabled={loading}
             />
             <button type="submit" className={styles.button} disabled={loading}>
-              <Search className={styles.buttonIcon} />
-              {loading ? 'Searching...' : 'Search'}
+              {loading ? (
+                <>
+                  <Loader className={`${styles.buttonIcon} ${styles.spinner}`} />
+                  <span>Searching</span>
+                  <span className={styles.loadingDotsContainer}>
+                    <span className={styles.loadingDots}></span>
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Search className={styles.buttonIcon} />
+                  Search
+                </>
+              )}
             </button>
           </form>
         </div>
         {searchHistory.length > 0 && (
           <div className={styles.historyContainer}>
             <h3 className={styles.historyTitle}>Recent Searches</h3>
-            <ul className={styles.historyList}>
+            <div className={styles.historyGrid}>
               {searchHistory.map((item, index) => (
-                <li key={index}>
-                  <button
-                    className={styles.historyButton}
-                    onClick={() => handleHistoryClick(item)}
-                    disabled={loading}
-                  >
-                    <Clock className={styles.buttonIcon} />
-                    <span className={styles.historyText}>{item}</span>
-                  </button>
-                </li>
+                <button
+                  key={index}
+                  className={styles.historyButton}
+                  onClick={() => handleHistoryClick(item)}
+                  disabled={loading}
+                >
+                  <Clock className={styles.buttonIcon} />
+                  <span className={styles.historyText}>{item}</span>
+                </button>
               ))}
-            </ul>
+            </div>
           </div>
         )}
       </div>
