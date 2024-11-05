@@ -3,66 +3,18 @@ import { useRef, useCallback, useEffect } from 'react';
 export const useSpotifyPlayer = () => {
   const audioRef = useRef(new Audio());
   const playPromiseRef = useRef(null);
-
-  useEffect(() => {
-    return () => {
-      if (playPromiseRef.current) {
-        playPromiseRef.current.then(() => {
-          audioRef.current.pause();
-          audioRef.current.src = '';
-        }).catch(() => {});
-      } else {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-      }
-    };
-  }, []);
-
-  const play = useCallback(async (previewUrl) => {
-    if (!previewUrl) return false;
-    
-    try {
-      if (playPromiseRef.current) {
-        await playPromiseRef.current;
-      }
-
-      if (audioRef.current.src !== previewUrl) {
-        audioRef.current.src = previewUrl;
-        audioRef.current.currentTime = 0;
-      }
-
-      playPromiseRef.current = audioRef.current.play();
-      await playPromiseRef.current;
-      playPromiseRef.current = null;
-      return true;
-    } catch (error) {
-      console.error("Error playing Spotify preview:", error);
-      playPromiseRef.current = null;
-      return false;
-    }
-  }, []);
-
-  const pause = useCallback(async () => {
-    try {
-      if (playPromiseRef.current) {
-        await playPromiseRef.current;
-      }
-      audioRef.current.pause();
-      return true;
-    } catch (error) {
-      console.error("Error pausing Spotify preview:", error);
-      return false;
-    }
-  }, []);
+  const isPlayingRef = useRef(false);
 
   const stop = useCallback(async () => {
     try {
+      isPlayingRef.current = false;
       if (playPromiseRef.current) {
         await playPromiseRef.current;
       }
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       audioRef.current.src = '';
+      playPromiseRef.current = null;
       return true;
     } catch (error) {
       console.error("Error stopping Spotify preview:", error);
@@ -70,29 +22,34 @@ export const useSpotifyPlayer = () => {
     }
   }, []);
 
-  const setupAudioListeners = useCallback((handlers) => {
-    const { onPlay, onPause, onEnded } = handlers;
+  const play = useCallback(async (previewUrl) => {
+    if (!previewUrl) return false;
     
-    const cleanup = () => {
-      audioRef.current.removeEventListener('play', onPlay);
-      audioRef.current.removeEventListener('pause', onPause);
-      audioRef.current.removeEventListener('ended', onEnded);
-    };
-
-    cleanup();
-    
-    audioRef.current.addEventListener('play', onPlay);
-    audioRef.current.addEventListener('pause', onPause);
-    audioRef.current.addEventListener('ended', onEnded);
-
-    return cleanup;
-  }, []);
+    try {
+      // Ensure any previous playback is fully stopped
+      await stop();
+      
+      audioRef.current.src = previewUrl;
+      audioRef.current.currentTime = 0;
+      
+      playPromiseRef.current = audioRef.current.play();
+      await playPromiseRef.current;
+      isPlayingRef.current = true;
+      playPromiseRef.current = null;
+      return true;
+    } catch (error) {
+      console.error("Error playing Spotify preview:", error);
+      isPlayingRef.current = false;
+      playPromiseRef.current = null;
+      return false;
+    }
+  }, [stop]);
 
   return {
     audioRef,
+    playPromiseRef,
+    isPlayingRef,
     play,
-    pause,
-    stop,
-    setupAudioListeners
+    stop
   };
 };
