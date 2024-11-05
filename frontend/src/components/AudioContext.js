@@ -169,18 +169,23 @@ export const AudioProvider = ({ children }) => {
 
       // Stop current song first and wait a moment
       await stopCurrentSong();
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Update current song state
-      setCurrentSong(song);
+      
+      // Reset states before starting new song
+      setIsPlaying(false);
       setProgress(0);
       setDuration(0);
+      
+      // Update current song state
+      setCurrentSong(song);
+
+      // Delay playing to ensure proper state updates
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Play the new song
       if (song.source === 'YouTube') {
         const success = await youtube.play(song.id);
         if (success) setIsPlaying(true);
-      } else if (song.previewUrl) {
+      } else if (song.source === 'Spotify' && song.previewUrl) {
         const success = await spotify.play(song.previewUrl);
         if (success) setIsPlaying(true);
       }
