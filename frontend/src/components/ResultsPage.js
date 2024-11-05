@@ -120,9 +120,15 @@ function ResultsPage() {
   // Normalize track data for searched tracks
   const normalizeTrack = (track, source) => ({
     ...track,
-    id: track.id || `${source}-${track.name}-${track.artist || track.artistName}`.replace(/\s+/g, '-').toLowerCase(),
+    id: source === 'Spotify' ? 
+      (track.id || track.url?.split('/').pop()) : // Use the Spotify URL ID as fallback
+      (track.videoId || track.id),
+    name: track.name || track.title,
+    artist: track.artist || track.artistName,
     source: source,
-    artist: track.artist || track.artistName // Handle both artist field formats
+    imageUrl: track.imageUrl || track.thumbnail,
+    url: track.url || track.externalUrl,
+    previewUrl: track.previewUrl
   });
 
   const normalizedSpotifyTrack = results.searchedTrack.spotify 

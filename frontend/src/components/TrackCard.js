@@ -15,7 +15,8 @@ function TrackCard({
     if (source === 'YouTube') {
       return track.videoId || track.id;
     } else if (source === 'Spotify') {
-      return track.id || `spotify-${track.name}-${track.artist}`.replace(/\s+/g, '-').toLowerCase();
+      return track.id || track.spotifyId || track.url?.split('/').pop() || 
+        `spotify-${track.name}-${track.artist}`.replace(/\s+/g, '-').toLowerCase();
     }
     return track.id;
   };
