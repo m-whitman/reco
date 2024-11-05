@@ -1,8 +1,22 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 
 export const useSpotifyPlayer = () => {
   const audioRef = useRef(new Audio());
   const playPromiseRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (playPromiseRef.current) {
+        playPromiseRef.current.then(() => {
+          audioRef.current.pause();
+          audioRef.current.src = '';
+        }).catch(() => {});
+      } else {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
+  }, []);
 
   const play = useCallback(async (previewUrl) => {
     if (!previewUrl) return false;

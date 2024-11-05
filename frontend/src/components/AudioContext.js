@@ -296,6 +296,7 @@ export const AudioProvider = ({ children }) => {
       isFavorite,
       youtubePlayerRef: youtube.playerRef,
       setIsPlaying: handleYouTubeStateChange,
+      stopCurrentSong,
       ...storage,
     }}>
       {children}
