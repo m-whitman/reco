@@ -200,20 +200,6 @@
   color: #1db954;
 }
 
-.sourceLink {
-  display: flex;
-  align-items: right;
-  justify-content: right;
-  padding: 4px 8px;
-  text-decoration: none;
-  border-radius: 4px;
-  transition: transform 0.2s ease;
-}
-
-.sourceLink:hover {
-  transform: scale(1.1);
-}
-
 .sourceIcon {
   font-size: 25px;
 }
@@ -307,9 +293,9 @@
 
 .footnote {
   text-align: center;
-  color: #B8A7D9;
+  color: #8B98B4;
   font-size: 0.8rem;
-  margin: 1rem 0;
+  margin: 2rem 0;
 }
 
 @media (max-width: 768px) {
