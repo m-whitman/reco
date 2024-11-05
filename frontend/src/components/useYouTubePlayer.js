@@ -9,6 +9,17 @@ export const useYouTubePlayer = () => {
     if (!playerRef.current) return false;
     
     try {
+      await new Promise((resolve) => {
+        const checkReady = () => {
+          if (playerRef.current?.getPlayerState() !== undefined) {
+            resolve();
+          } else {
+            setTimeout(checkReady, 100);
+          }
+        };
+        checkReady();
+      });
+
       if (videoId) {
         playerRef.current.loadVideoById(videoId);
       } else {
