@@ -144,6 +144,13 @@ function ResultsPage() {
       <div className={styles.container}>
         <h2 className={styles.title}>Search Results for "{query}"</h2>
         
+        <div className={styles.infoCard}>
+          <span className={styles.infoIcon}>ℹ️</span>
+          <p className={styles.infoText}>
+            Due to Spotify API limitations, Spotify tracks are limited to 30-second preview clips
+          </p>
+        </div>
+
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>Searched Track</h3>
           <div className={styles.grid}>

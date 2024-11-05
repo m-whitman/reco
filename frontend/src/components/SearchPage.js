@@ -46,16 +46,16 @@ function SearchPage() {
         <h2 className={styles.title}>Discover Your Next Favorite Song</h2>
         <div className={styles.featureCards}>
           <div className={styles.featureCard}>
-            <h4>🎵 No More Platform Hopping!</h4>
-            <p>Find your tunes in one place - no need to juggle between apps</p>
+            <div className={styles.featureEmoji}>🎵</div>
+            <p>Stop switching between platforms to find new music</p>
           </div>
           <div className={styles.featureCard}>
-            <h4>🎧 Everything in One Spot</h4>
-            <p>Get the best of Spotify and YouTube together (with more platforms on the way!)</p>
+            <div className={styles.featureEmoji}>🎧</div>
+            <p>Reco brings together songs from Spotify and YouTube in one search*</p>
           </div>
           <div className={styles.featureCard}>
-            <h4>✨ Smart Music Magic</h4>
-            <p>Let our clever algorithms find your next favorite tracks</p>
+            <div className={styles.featureEmoji}>✨</div>
+            <p>You get smarter recommendations for better music discovery</p>
           </div>
         </div>
         <div className={styles.infoCard}>

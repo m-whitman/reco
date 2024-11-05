@@ -231,3 +231,32 @@
 .sourceIcon {
   font-size: 20px;
 }
+
+.infoCard {
+  background: rgba(135, 206, 235, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  backdrop-filter: blur(8px);
+  max-width: 600px;
+  width: 90%;
+}
+
+.infoIcon {
+  font-size: 1.5rem;
+}
+
+.infoText {
+  margin: 0;
+  color: #87CEEB;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .infoCard {
+    padding: 1.25rem;
+  }
+}
