@@ -58,12 +58,6 @@ function SearchPage() {
             <p>You get smarter recommendations for better music discovery</p>
           </div>
         </div>
-        <div className={styles.infoCard}>
-          <span className={styles.infoIcon}>ℹ️</span>
-          <p className={styles.infoText}>
-            Quick heads up: Spotify previews are 30 seconds long (it's their rule, not ours!)
-          </p>
-        </div>
         <div className={styles.formContainer}>
           <form onSubmit={handleSubmit} className={styles.form}>
             <input
