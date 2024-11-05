@@ -128,26 +128,17 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
-      // Store the current song source before changing it
-      const previousSource = currentSongRef.current?.source;
-      
       // Stop current playback and reset states
       setIsPlaying(false);
       setProgress(0);
       setDuration(0);
       
-      // Ensure previous source is fully stopped before starting new one
-      if (previousSource === 'YouTube') {
-        await youtube.stop();
-      } else if (previousSource === 'Spotify') {
-        await spotify.stop();
-      }
-
-      // Wait a moment to ensure cleanup is complete
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
-      // Update current song state
+      // Update current song state before playing
       setCurrentSong(song);
+      currentSongRef.current = song;  // Explicitly update ref
+      
+      // Small delay to ensure state is updated
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       // Play the new song
       if (song.source === 'YouTube') {
@@ -162,24 +153,36 @@ export const AudioProvider = ({ children }) => {
       setIsPlaying(false);
       setCurrentSong(null);
     }
-  }, [youtube, spotify, togglePlayPause]);
+  }, [youtube, spotify, togglePlayPause, currentSongRef]);
 
+  // First, let's add a flag to track transitions
+  const isTransitioningRef = useRef(false);
+
+  // Modify the playNext function to use this flag
   const playNext = useCallback(async () => {
-    if (queueIndex < queue.length - 1) {
-      await stopCurrentSong();
-      const nextTrack = queue[queueIndex + 1];
-      setQueueIndex(queueIndex + 1);
-      await playSong(nextTrack);
+    if (queueIndex < queue.length - 1 && !isTransitioningRef.current) {
+      try {
+        isTransitioningRef.current = true;
+        await stopCurrentSong();
+        const nextTrack = queue[queueIndex + 1];
+        setQueueIndex(queueIndex + 1);
+        await playSong(nextTrack);
+      } finally {
+        isTransitioningRef.current = false;
+      }
     }
   }, [queueIndex, queue, stopCurrentSong, playSong]);
 
+  // Modify the Spotify ended event handler
   useEffect(() => {
     const handleEnded = async () => {
-      if (currentSongRef.current?.source === 'Spotify') {
+      if (currentSongRef.current?.source === 'Spotify' && !isTransitioningRef.current) {
         setIsPlaying(false);
         if (queueIndex < queue.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 50));
-          await playNext();
+          // Ensure we're not already transitioning
+          if (!isTransitioningRef.current) {
+            await playNext();
+          }
         } else {
           setCurrentSong(null);
           setProgress(0);
@@ -247,10 +250,11 @@ export const AudioProvider = ({ children }) => {
     setQueueIndex(tracks.findIndex(track => track.id === currentTrack.id));
   }, []);
 
+  // Also modify the YouTube state change handler
   const handleYouTubeStateChange = useCallback((state) => {
     const song = currentSongRef.current;
     if (song?.source === 'YouTube') {
-      if (state === 0) { // Video ended
+      if (state === 0 && !isTransitioningRef.current) { // Video ended
         if (queueIndex < queue.length - 1) {
           playNext();
         } else {
@@ -268,7 +272,7 @@ export const AudioProvider = ({ children }) => {
         setIsPlaying(false);
       }
     }
-  }, [queueIndex, queue, playNext, youtube.playerRef]);
+  }, [queueIndex, queue.length, playNext]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
