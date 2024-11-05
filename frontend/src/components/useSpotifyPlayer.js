@@ -10,6 +10,11 @@ export const useSpotifyPlayer = () => {
 
     const handleError = (e) => {
       console.error('Audio element error:', e);
+      console.error('Error details:', {
+        error: e.target.error,
+        currentSrc: e.target.currentSrc,
+        readyState: e.target.readyState
+      });
     };
 
     const handlePlay = () => {
@@ -63,7 +68,6 @@ export const useSpotifyPlayer = () => {
       }
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
-      audioRef.current.src = '';
       playPromiseRef.current = null;
       return true;
     } catch (error) {
