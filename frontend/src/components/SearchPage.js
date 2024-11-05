@@ -51,7 +51,7 @@ function SearchPage() {
           </div>
           <div className={styles.featureCard}>
             <div className={styles.featureEmoji}>🎧</div>
-            <p>Reco brings together songs from Spotify and YouTube in one search*</p>
+            <p>Reco brings together songs from Spotify and YouTube in one search</p>
           </div>
           <div className={styles.featureCard}>
             <div className={styles.featureEmoji}>✨</div>
