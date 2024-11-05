@@ -90,6 +90,34 @@ export const AudioProvider = ({ children }) => {
     }
   }, [youtube, spotify]);
 
+  const togglePlayPause = useCallback(async () => {
+    const song = currentSongRef.current;
+    if (!song) return;
+
+    try {
+      if (song.source === 'YouTube') {
+        if (isPlaying) {
+          await youtube.pause();
+          setIsPlaying(false);
+        } else {
+          const success = await youtube.play(song.id);
+          if (success) setIsPlaying(true);
+        }
+      } else {
+        if (isPlaying) {
+          spotify.pause();
+          setIsPlaying(false);
+        } else {
+          const success = await spotify.play(song.previewUrl);
+          if (success) setIsPlaying(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling playback:", error);
+      setIsPlaying(false);
+    }
+  }, [isPlaying, youtube, spotify]);
+
   const playSong = useCallback(async (song) => {
     if (!song) return;
 
@@ -184,34 +212,6 @@ export const AudioProvider = ({ children }) => {
       console.error("Error seeking:", error);
     }
   }, [currentSong, youtube.playerRef, spotify.audioRef]);
-
-  const togglePlayPause = useCallback(async () => {
-    const song = currentSongRef.current;
-    if (!song) return;
-
-    try {
-      if (song.source === 'YouTube') {
-        if (isPlaying) {
-          await youtube.pause();
-          setIsPlaying(false);
-        } else {
-          const success = await youtube.play(song.id);
-          if (success) setIsPlaying(true);
-        }
-      } else {
-        if (isPlaying) {
-          spotify.pause();
-          setIsPlaying(false);
-        } else {
-          const success = await spotify.play(song.previewUrl);
-          if (success) setIsPlaying(true);
-        }
-      }
-    } catch (error) {
-      console.error("Error toggling playback:", error);
-      setIsPlaying(false);
-    }
-  }, [isPlaying, youtube, spotify]);
 
   const toggleFavorite = useCallback((song) => {
     setFavorites(prevFavorites => {
