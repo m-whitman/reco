@@ -72,13 +72,20 @@ export const AudioProvider = ({ children }) => {
     };
   }, [currentSong, spotify.audioRef]);
 
-  // Set up Spotify audio event listeners
+  const playNext = useCallback(async () => {
+    if (queueIndex < queue.length - 1) {
+      await stopCurrentSong();
+      const nextTrack = queue[queueIndex + 1];
+      setQueueIndex(queueIndex + 1);
+      await playSong(nextTrack);
+    }
+  }, [queueIndex, queue, stopCurrentSong, playSong]);
+
   useEffect(() => {
     const handleEnded = async () => {
       if (currentSongRef.current?.source === 'Spotify') {
         setIsPlaying(false);
         if (queueIndex < queue.length - 1) {
-          // Small delay to ensure cleanup
           await new Promise(resolve => setTimeout(resolve, 50));
           await playNext();
         } else {
@@ -225,15 +232,6 @@ export const AudioProvider = ({ children }) => {
   const isFavorite = useCallback((song) => {
     return favorites.some(fav => fav.id === song.id);
   }, [favorites]);
-
-  const playNext = useCallback(async () => {
-    if (queueIndex < queue.length - 1) {
-      await stopCurrentSong();
-      const nextTrack = queue[queueIndex + 1];
-      setQueueIndex(queueIndex + 1);
-      await playSong(nextTrack);
-    }
-  }, [queueIndex, queue, stopCurrentSong, playSong]);
 
   const playPrevious = useCallback(async () => {
     if (queueIndex > 0) {
