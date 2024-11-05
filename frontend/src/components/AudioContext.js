@@ -167,8 +167,9 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
-      // Stop current song first
+      // Stop current song first and wait a moment
       await stopCurrentSong();
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Update current song state
       setCurrentSong(song);
@@ -177,17 +178,11 @@ export const AudioProvider = ({ children }) => {
       
       // Play the new song
       if (song.source === 'YouTube') {
-        setTimeout(() => {
-          const success = youtube.play(song.id);
-          if (success) {
-            setIsPlaying(true);
-          }
-        }, 100);
+        const success = await youtube.play(song.id);
+        if (success) setIsPlaying(true);
       } else if (song.previewUrl) {
         const success = await spotify.play(song.previewUrl);
-        if (success) {
-          setIsPlaying(true);
-        }
+        if (success) setIsPlaying(true);
       }
     } catch (error) {
       console.error("Error playing song:", error);
@@ -261,6 +256,21 @@ export const AudioProvider = ({ children }) => {
       }
     }
   }, [queueIndex, queue, playNext, youtube.playerRef]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (currentSongRef.current) {
+        if (currentSongRef.current.source === 'YouTube') {
+          youtube.stop();
+        } else {
+          spotify.stop();
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [youtube, spotify]);
 
   return (
     <AudioContext.Provider value={{ 
