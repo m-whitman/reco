@@ -1,9 +1,9 @@
 import { useRef, useCallback } from 'react';
-import { useAudioPlayer } from '../hooks/useAudioPlayer';
+import { useAudioPlayer } from './useAudioPlayer';
 
 export const useYouTubePlayer = () => {
   const playerRef = useRef(null);
-  const { playPromiseRef, isPlayingRef } = useAudioPlayer(playerRef);
+  const { isPlayingRef } = useAudioPlayer(playerRef);
 
   const play = useCallback(async (videoId) => {
     if (!playerRef.current) return false;
@@ -21,7 +21,7 @@ export const useYouTubePlayer = () => {
       isPlayingRef.current = false;
       return false;
     }
-  }, []);
+  }, [isPlayingRef]);
 
   const stop = useCallback(async () => {
     if (!playerRef.current) return false;
@@ -34,7 +34,7 @@ export const useYouTubePlayer = () => {
       console.error('YouTube stop error:', error);
       return false;
     }
-  }, []);
+  }, [isPlayingRef]);
 
   return { playerRef, play, stop };
 };

@@ -1,5 +1,5 @@
 import { useRef, useCallback } from 'react';
-import { useAudioPlayer } from '../hooks/useAudioPlayer';
+import { useAudioPlayer } from './useAudioPlayer';
 
 export const useSpotifyPlayer = () => {
   const audioRef = useRef(new Audio());
@@ -19,7 +19,7 @@ export const useSpotifyPlayer = () => {
       console.error("Error stopping Spotify preview:", error);
       return false;
     }
-  }, []);
+  }, [isPlayingRef, playPromiseRef]);
 
   const play = useCallback(async (previewUrl) => {
     if (!previewUrl) return false;
@@ -40,7 +40,7 @@ export const useSpotifyPlayer = () => {
       playPromiseRef.current = null;
       return false;
     }
-  }, [stop]);
+  }, [stop, isPlayingRef, playPromiseRef]);
 
   return { audioRef, play, stop };
 };
