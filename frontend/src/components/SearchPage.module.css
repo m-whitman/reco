@@ -10,7 +10,7 @@
   font-size: 2.25rem;
   font-weight: bold;
   text-align: center;
-  margin: 0 0 2rem 0;
+  padding: 1rem;
 }
 
 .formContainer {
@@ -31,6 +31,7 @@
   color: white;
   border-radius: 8px;
   font-size: 1rem;
+  text-align: center;
 }
 
 .input::placeholder {
