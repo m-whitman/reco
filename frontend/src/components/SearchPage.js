@@ -44,6 +44,26 @@ function SearchPage() {
       <div className={styles.container}>
         <img src={logo} alt="Logo" className={styles.responsiveImage} />
         <h2 className={styles.title}>Discover Your Next Favorite Song</h2>
+        <div className={styles.featureCards}>
+          <div className={styles.featureCard}>
+            <h4>🎵 No More Platform Hopping!</h4>
+            <p>Find your tunes in one place - no need to juggle between apps</p>
+          </div>
+          <div className={styles.featureCard}>
+            <h4>🎧 Everything in One Spot</h4>
+            <p>Get the best of Spotify and YouTube together (with more platforms on the way!)</p>
+          </div>
+          <div className={styles.featureCard}>
+            <h4>✨ Smart Music Magic</h4>
+            <p>Let our clever algorithms find your next favorite tracks</p>
+          </div>
+        </div>
+        <div className={styles.infoCard}>
+          <span className={styles.infoIcon}>ℹ️</span>
+          <p className={styles.infoText}>
+            Quick heads up: Spotify previews are 30 seconds long (it's their rule, not ours!)
+          </p>
+        </div>
         <div className={styles.formContainer}>
           <form onSubmit={handleSubmit} className={styles.form}>
             <input

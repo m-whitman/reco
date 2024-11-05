@@ -219,3 +219,71 @@
   60% { content: '..'; }
   80%, 100% { content: '...'; }
 }
+
+.featureCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin: 2rem auto;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 1rem;
+}
+
+.featureCard {
+  background: rgba(147, 112, 219, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  backdrop-filter: blur(8px);
+  transition: transform 0.2s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-4px);
+}
+
+.featureCard h4 {
+  color: #9370DB;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+}
+
+.featureCard p {
+  margin: 0;
+  line-height: 1.5;
+  color: #B8A7D9;
+}
+
+.infoCard {
+  background: rgba(29, 185, 84, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  backdrop-filter: blur(8px);
+  max-width: 600px;
+  width: 90%;
+}
+
+.infoIcon {
+  font-size: 1.5rem;
+}
+
+.infoText {
+  margin: 0;
+  color: #1DB954;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .featureCards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .featureCard, .infoCard {
+    padding: 1.25rem;
+  }
+}
