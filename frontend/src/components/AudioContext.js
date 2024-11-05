@@ -72,6 +72,70 @@ export const AudioProvider = ({ children }) => {
     };
   }, [currentSong, spotify.audioRef]);
 
+  const stopCurrentSong = useCallback(async () => {
+    const song = currentSongRef.current;
+    if (!song) return;
+
+    try {
+      if (song.source === 'YouTube') {
+        await youtube.stop();
+      } else {
+        spotify.stop();
+      }
+      setIsPlaying(false);
+      setProgress(0);
+      setDuration(0);
+    } catch (error) {
+      console.error("Error stopping current song:", error);
+    }
+  }, [youtube, spotify]);
+
+  const playSong = useCallback(async (song) => {
+    if (!song) return;
+
+    try {
+      // If trying to play the same song, just toggle play/pause
+      if (currentSongRef.current && currentSongRef.current.id === song.id) {
+        await togglePlayPause();
+        return;
+      }
+
+      // Store the current song source before changing it
+      const previousSource = currentSongRef.current?.source;
+      
+      // Stop current playback and reset states
+      setIsPlaying(false);
+      setProgress(0);
+      setDuration(0);
+      
+      // Ensure previous source is fully stopped before starting new one
+      if (previousSource === 'YouTube') {
+        await youtube.stop();
+      } else if (previousSource === 'Spotify') {
+        await spotify.stop();
+      }
+
+      // Wait a moment to ensure cleanup is complete
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Update current song state
+      setCurrentSong(song);
+      
+      // Play the new song
+      if (song.source === 'YouTube') {
+        const success = await youtube.play(song.id);
+        if (success) setIsPlaying(true);
+      } else if (song.source === 'Spotify' && song.previewUrl) {
+        const success = await spotify.play(song.previewUrl);
+        if (success) setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error("Error playing song:", error);
+      setIsPlaying(false);
+      setCurrentSong(null);
+    }
+  }, [youtube, spotify, togglePlayPause]);
+
   const playNext = useCallback(async () => {
     if (queueIndex < queue.length - 1) {
       await stopCurrentSong();
@@ -121,24 +185,6 @@ export const AudioProvider = ({ children }) => {
     }
   }, [currentSong, youtube.playerRef, spotify.audioRef]);
 
-  const stopCurrentSong = useCallback(async () => {
-    const song = currentSongRef.current;
-    if (!song) return;
-
-    try {
-      if (song.source === 'YouTube') {
-        await youtube.stop();
-      } else {
-        spotify.stop();
-      }
-      setIsPlaying(false);
-      setProgress(0);
-      setDuration(0);
-    } catch (error) {
-      console.error("Error stopping current song:", error);
-    }
-  }, [youtube, spotify]);
-
   const togglePlayPause = useCallback(async () => {
     const song = currentSongRef.current;
     if (!song) return;
@@ -166,52 +212,6 @@ export const AudioProvider = ({ children }) => {
       setIsPlaying(false);
     }
   }, [isPlaying, youtube, spotify]);
-
-  const playSong = useCallback(async (song) => {
-    if (!song) return;
-
-    try {
-      // If trying to play the same song, just toggle play/pause
-      if (currentSongRef.current && currentSongRef.current.id === song.id) {
-        await togglePlayPause();
-        return;
-      }
-
-      // Store the current song source before changing it
-      const previousSource = currentSongRef.current?.source;
-      
-      // Stop current playback and reset states
-      setIsPlaying(false);
-      setProgress(0);
-      setDuration(0);
-      
-      // Ensure previous source is fully stopped before starting new one
-      if (previousSource === 'YouTube') {
-        await youtube.stop();
-      } else if (previousSource === 'Spotify') {
-        await spotify.stop();
-      }
-
-      // Wait a moment to ensure cleanup is complete
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
-      // Update current song state
-      setCurrentSong(song);
-      
-      // Play the new song
-      if (song.source === 'YouTube') {
-        const success = await youtube.play(song.id);
-        if (success) setIsPlaying(true);
-      } else if (song.source === 'Spotify' && song.previewUrl) {
-        const success = await spotify.play(song.previewUrl);
-        if (success) setIsPlaying(true);
-      }
-    } catch (error) {
-      console.error("Error playing song:", error);
-      setIsPlaying(false);
-      setCurrentSong(null);
-    }
-  }, [youtube, spotify, togglePlayPause]);
 
   const toggleFavorite = useCallback((song) => {
     setFavorites(prevFavorites => {
