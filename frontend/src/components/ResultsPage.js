@@ -120,8 +120,9 @@ function ResultsPage() {
   // Normalize track data for searched tracks
   const normalizeTrack = (track, source) => ({
     ...track,
-    id: track.id || `${source}-${track.name}-${track.artist}`.replace(/\s+/g, '-').toLowerCase(),
-    source: source
+    id: track.id || `${source}-${track.name}-${track.artist || track.artistName}`.replace(/\s+/g, '-').toLowerCase(),
+    source: source,
+    artist: track.artist || track.artistName // Handle both artist field formats
   });
 
   const normalizedSpotifyTrack = results.searchedTrack.spotify 
@@ -138,17 +139,24 @@ function ResultsPage() {
         <h2 className={styles.title}>Search Results for "{query}"</h2>
         
         <div className={styles.introSection}>
-          <p className={styles.introText}>
-            Stop switching between platforms to find new music.<br />
-            Reco brings together songs from Spotify and YouTube in one search*.<br />
-            You get smarter recommendations for better music discovery.
-          </p>
+          <div className={styles.featureCards}>
+            <div className={styles.featureCard}>
+              <h4>Cross-Platform Search</h4>
+              <p>Stop switching between platforms to find new music</p>
+            </div>
+            <div className={styles.featureCard}>
+              <h4>Unified Experience</h4>
+              <p>Reco brings together songs from Spotify and YouTube in one search*</p>
+            </div>
+            <div className={styles.featureCard}>
+              <h4>Smart Discovery</h4>
+              <p>You get smarter recommendations for better music discovery</p>
+            </div>
+          </div>
           
-          <p className={styles.footnote}>
-            * More platforms coming soon
-          </p>
+          <p className={styles.footnote}>* More platforms coming soon</p>
           
-          <div className={styles.infoBox}>
+          <div className={styles.infoCard}>
             <span className={styles.infoIcon}>ℹ️</span>
             <p className={styles.infoText}>
               Due to Spotify API limitations, Spotify tracks are limited to 30-second preview clips
