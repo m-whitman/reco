@@ -189,8 +189,8 @@ function ResultsPage() {
                 source={item.source}
                 onPlay={handlePlay}
                 onToggleFavorite={toggleFavorite}
-                isPlaying={isPlaying && currentSong?.id === item.track.id}
-                isCurrentTrack={currentSong?.id === item.track.id}
+                isPlaying={isPlaying && currentSong?.id === normalizeTrack(item.track, item.source).id}
+                isCurrentTrack={currentSong?.id === normalizeTrack(item.track, item.source).id}
                 isFavorite={isFavorite(item.track.id)}
               />
             ))}
