@@ -29,10 +29,17 @@ export const useSpotifyPlayer = () => {
       audioRef.current.src = previewUrl;
       audioRef.current.currentTime = 0;
       
+      await new Promise((resolve) => {
+        const canPlayHandler = () => {
+          audioRef.current.removeEventListener('canplay', canPlayHandler);
+          resolve();
+        };
+        audioRef.current.addEventListener('canplay', canPlayHandler);
+      });
+      
       playPromiseRef.current = audioRef.current.play();
       await playPromiseRef.current;
       isPlayingRef.current = true;
-      playPromiseRef.current = null;
       return true;
     } catch (error) {
       console.error('Error playing Spotify preview:', error);

@@ -24,30 +24,51 @@ export const useAudioPlayer = (audioRef) => {
         });
       };
 
-      const handleStateChange = () => {
-        console.log('Audio state:', {
-          currentTime: audio.currentTime,
-          duration: audio.duration,
-          ended: audio.ended,
-          paused: audio.paused,
-          readyState: audio.readyState,
-          volume: audio.volume
-        });
+      const handlePlay = () => {
+        console.log('Audio element play event fired');
+      };
+
+      const handlePlaying = () => {
+        console.log('Audio element is now playing');
+        isPlayingRef.current = true;
+      };
+
+      const handleWaiting = () => {
+        console.log('Audio element is waiting for data');
+      };
+
+      const handleLoadStart = () => {
+        console.log('Audio element started loading:', audio.src);
+      };
+
+      const handleCanPlay = () => {
+        console.log('Audio element can play');
+        console.log('Duration:', audio.duration);
+        console.log('Ready state:', audio.readyState);
+      };
+
+      const handlePause = () => {
+        console.log('Audio element paused');
+        isPlayingRef.current = false;
       };
 
       // Add event listeners
       audio.addEventListener('error', handleError);
-      audio.addEventListener('play', handleStateChange);
-      audio.addEventListener('pause', handleStateChange);
-      audio.addEventListener('ended', handleStateChange);
-      audio.addEventListener('timeupdate', handleStateChange);
+      audio.addEventListener('play', handlePlay);
+      audio.addEventListener('playing', handlePlaying);
+      audio.addEventListener('waiting', handleWaiting);
+      audio.addEventListener('loadstart', handleLoadStart);
+      audio.addEventListener('canplay', handleCanPlay);
+      audio.addEventListener('pause', handlePause);
 
       return () => {
         audio.removeEventListener('error', handleError);
-        audio.removeEventListener('play', handleStateChange);
-        audio.removeEventListener('pause', handleStateChange);
-        audio.removeEventListener('ended', handleStateChange);
-        audio.removeEventListener('timeupdate', handleStateChange);
+        audio.removeEventListener('play', handlePlay);
+        audio.removeEventListener('playing', handlePlaying);
+        audio.removeEventListener('waiting', handleWaiting);
+        audio.removeEventListener('loadstart', handleLoadStart);
+        audio.removeEventListener('canplay', handleCanPlay);
+        audio.removeEventListener('pause', handlePause);
       };
     }
   }, [audioRef]);
