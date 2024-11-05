@@ -34,18 +34,13 @@ export const AudioProvider = ({ children }) => {
 
     if (isPlaying && currentSong) {
       progressInterval.current = setInterval(() => {
-        if (currentSong.source === 'YouTube' && youtube.playerRef.current) {
-          const currentTime = youtube.playerRef.current.getCurrentTime();
-          const totalDuration = youtube.playerRef.current.getDuration();
+        const player = currentSong.source === 'YouTube' ? youtube : spotify;
+        const currentTime = player.audioRef.current?.currentTime || 0;
+        const totalDuration = player.audioRef.current?.duration || 0;
+        
+        if (!isNaN(totalDuration) && totalDuration > 0) {
           setProgress((currentTime / totalDuration) * 100);
           setDuration(totalDuration);
-        } else if (currentSong.source === 'Spotify' && spotify.audioRef.current) {
-          const currentTime = spotify.audioRef.current.currentTime;
-          const totalDuration = spotify.audioRef.current.duration;
-          if (!isNaN(totalDuration)) {
-            setProgress((currentTime / totalDuration) * 100);
-            setDuration(totalDuration);
-          }
         }
       }, 1000);
     }
@@ -55,7 +50,7 @@ export const AudioProvider = ({ children }) => {
         clearInterval(progressInterval.current);
       }
     };
-  }, [isPlaying, currentSong, youtube.playerRef, spotify.audioRef]);
+  }, [isPlaying, currentSong, youtube, spotify]);
 
   // Set up audio duration listener for Spotify
   useEffect(() => {
@@ -256,25 +251,19 @@ export const AudioProvider = ({ children }) => {
   const handleYouTubeStateChange = useCallback((state) => {
     const song = currentSongRef.current;
     if (song?.source === 'YouTube') {
-      if (state === 0 && !isTransitioningRef.current) { // Video ended
+      if (state === 0) { // Video ended
         if (queueIndex < queue.length - 1) {
           playNext();
         } else {
-          setIsPlaying(false);
-          setCurrentSong(null);
-          setProgress(0);
-          setDuration(0);
+          stopCurrentSong();
         }
       } else if (state === 1) { // Playing
         setIsPlaying(true);
-        if (youtube.playerRef.current) {
-          setDuration(youtube.playerRef.current.getDuration());
-        }
       } else if (state === 2) { // Paused
         setIsPlaying(false);
       }
     }
-  }, [queueIndex, queue.length, playNext]);
+  }, [queueIndex, queue.length, playNext, stopCurrentSong]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {

@@ -1,46 +1,34 @@
 import { useRef, useCallback } from 'react';
+import { useAudioPlayer } from '../hooks/useAudioPlayer';
 
 export const useYouTubePlayer = () => {
   const playerRef = useRef(null);
+  const { playPromiseRef, isPlayingRef } = useAudioPlayer(playerRef);
 
-  const play = useCallback((videoId) => {
-    const player = playerRef.current;
-    if (!player) {
-      return false;
-    }
-
+  const play = useCallback(async (videoId) => {
+    if (!playerRef.current) return false;
+    
     try {
       if (videoId) {
-        player.loadVideoById(videoId);
+        playerRef.current.loadVideoById(videoId);
       } else {
-        player.playVideo();
+        playerRef.current.playVideo();
       }
+      isPlayingRef.current = true;
       return true;
     } catch (error) {
       console.error('YouTube play error:', error);
+      isPlayingRef.current = false;
       return false;
     }
   }, []);
 
-  const pause = useCallback(() => {
-    const player = playerRef.current;
-    if (!player) return false;
-
+  const stop = useCallback(async () => {
+    if (!playerRef.current) return false;
+    
     try {
-      player.pauseVideo();
-      return true;
-    } catch (error) {
-      console.error('YouTube pause error:', error);
-      return false;
-    }
-  }, []);
-
-  const stop = useCallback(() => {
-    const player = playerRef.current;
-    if (!player) return false;
-
-    try {
-      player.stopVideo();
+      isPlayingRef.current = false;
+      playerRef.current.stopVideo();
       return true;
     } catch (error) {
       console.error('YouTube stop error:', error);
@@ -48,10 +36,5 @@ export const useYouTubePlayer = () => {
     }
   }, []);
 
-  return {
-    playerRef,
-    play,
-    pause,
-    stop
-  };
+  return { playerRef, play, stop };
 };
