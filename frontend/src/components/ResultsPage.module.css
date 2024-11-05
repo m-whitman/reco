@@ -235,9 +235,10 @@
 .infoCard {
   background: rgba(135, 206, 235, 0.1);
   border-radius: 12px;
+  padding: 1.5rem;
   margin: 1.5rem auto;
   display: flex;
-  align-items: left;
+  align-items: center;
   gap: 1rem;
   backdrop-filter: blur(8px);
   max-width: 600px;
@@ -257,6 +258,5 @@
 @media (max-width: 768px) {
   .infoCard {
     padding: 1.25rem;
-    align-items: center;
   }
 }
