@@ -73,25 +73,28 @@ export const AudioProvider = ({ children }) => {
   }, [currentSong, spotify.audioRef]);
 
   // Set up Spotify audio event listeners
-  spotify.setupAudioListeners({
-    onPlay: () => {
-      setIsPlaying(true);
-      if (!isNaN(spotify.audioRef.current.duration)) {
-        setDuration(spotify.audioRef.current.duration);
-      }
-    },
-    onPause: () => setIsPlaying(false),
-    onEnded: async () => {
-      if (queueIndex < queue.length - 1) {
-        await playNext();
-      } else {
+  useEffect(() => {
+    const handleEnded = async () => {
+      if (currentSongRef.current?.source === 'Spotify') {
         setIsPlaying(false);
-        setCurrentSong(null);
-        setProgress(0);
-        setDuration(0);
+        if (queueIndex < queue.length - 1) {
+          // Small delay to ensure cleanup
+          await new Promise(resolve => setTimeout(resolve, 50));
+          await playNext();
+        } else {
+          setCurrentSong(null);
+          setProgress(0);
+          setDuration(0);
+        }
       }
-    }
-  });
+    };
+
+    spotify.audioRef.current.addEventListener('ended', handleEnded);
+    
+    return () => {
+      spotify.audioRef.current.removeEventListener('ended', handleEnded);
+    };
+  }, [spotify.audioRef, playNext, queueIndex, queue.length]);
 
   const seekTo = useCallback(async (percentage) => {
     if (!currentSong) return;
@@ -167,19 +170,26 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
-      // Stop current song first and wait a moment
-      await stopCurrentSong();
+      // Store the current song source before changing it
+      const previousSource = currentSongRef.current?.source;
       
-      // Reset states before starting new song
+      // Stop current playback and reset states
       setIsPlaying(false);
       setProgress(0);
       setDuration(0);
       
+      // Ensure previous source is fully stopped before starting new one
+      if (previousSource === 'YouTube') {
+        await youtube.stop();
+      } else if (previousSource === 'Spotify') {
+        await spotify.stop();
+      }
+
+      // Wait a moment to ensure cleanup is complete
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
       // Update current song state
       setCurrentSong(song);
-
-      // Delay playing to ensure proper state updates
-      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Play the new song
       if (song.source === 'YouTube') {
@@ -194,7 +204,7 @@ export const AudioProvider = ({ children }) => {
       setIsPlaying(false);
       setCurrentSong(null);
     }
-  }, [youtube, spotify, stopCurrentSong, togglePlayPause]);
+  }, [youtube, spotify, togglePlayPause]);
 
   const toggleFavorite = useCallback((song) => {
     setFavorites(prevFavorites => {
