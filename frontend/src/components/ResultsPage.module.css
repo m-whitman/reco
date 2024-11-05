@@ -93,6 +93,7 @@
 
 .playButton.currentTrack {
   color: #1DB954;
+  background: rgba(29, 185, 84, 0.1);
 }
 
 .playButton.currentTrack:hover {
@@ -120,10 +121,19 @@
   width: 1.2rem;
   height: 1.2rem;
   transition: all 0.2s ease;
+  color: #888;
 }
 
 .favoriteIcon.favorited {
   color: #ff4444;
+}
+
+.favoriteButton:hover .favoriteIcon {
+  color: #ff4444;
+}
+
+.favoriteButton:hover .favoriteIcon.favorited {
+  color: #ff6666;
 }
 
 .sourceTag {

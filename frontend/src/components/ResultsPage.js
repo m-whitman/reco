@@ -166,6 +166,7 @@ function ResultsPage() {
                 onPlay={handlePlay}
                 onToggleFavorite={toggleFavorite}
                 isPlaying={isPlaying && currentSong?.id === normalizedSpotifyTrack.id}
+                isCurrentTrack={currentSong?.id === normalizedSpotifyTrack.id}
                 isFavorite={isFavorite(normalizedSpotifyTrack.id)}
               />
             )}
@@ -176,6 +177,7 @@ function ResultsPage() {
                 onPlay={handlePlay}
                 onToggleFavorite={toggleFavorite}
                 isPlaying={isPlaying && currentSong?.id === normalizedYoutubeTrack.id}
+                isCurrentTrack={currentSong?.id === normalizedYoutubeTrack.id}
                 isFavorite={isFavorite(normalizedYoutubeTrack.id)}
               />
             )}
@@ -193,6 +195,7 @@ function ResultsPage() {
                 onPlay={handlePlay}
                 onToggleFavorite={toggleFavorite}
                 isPlaying={isPlaying && currentSong?.id === item.track.id}
+                isCurrentTrack={currentSong?.id === item.track.id}
                 isFavorite={isFavorite(item.track.id)}
               />
             ))}

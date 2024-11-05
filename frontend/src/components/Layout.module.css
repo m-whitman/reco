@@ -7,7 +7,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 3rem;
-  padding-top: 120px;
+  padding-top: 90px;
 }
 
 .footer {
@@ -19,6 +19,7 @@
 @media (max-width: 768px) {
   .main {
     padding: 1rem;
+    padding-top: 90px;
   }
   
   /* Hide the sidebar on mobile */
