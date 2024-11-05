@@ -36,20 +36,20 @@ function ResultsPage() {
   }, [stopCurrentSong]);
 
   const handlePlay = (track) => {
-    console.log(`Playing ${track.source} track:`, track);
+    console.log('1. handlePlay called with track:', track);
+    console.log('2. Track preview URL:', track.previewUrl); // For Spotify tracks
     
     // Create queue based on section
     let queueTracks;
     if (track.id === normalizedSpotifyTrack?.id || track.id === normalizedYoutubeTrack?.id) {
-      // If playing from search results section
       queueTracks = [normalizedSpotifyTrack, normalizedYoutubeTrack].filter(Boolean);
     } else {
-      // If playing from recommendations section
       queueTracks = mixedRecommendations.map(item => 
         normalizeTrack(item.track, item.source)
       );
     }
     
+    console.log('3. Queue tracks:', queueTracks);
     updateQueue(queueTracks, track);
     playSong(track);
   };

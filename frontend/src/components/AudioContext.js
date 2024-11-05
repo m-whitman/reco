@@ -119,37 +119,39 @@ export const AudioProvider = ({ children }) => {
   }, [isPlaying, youtube, spotify]);
 
   const playSong = useCallback(async (song) => {
+    console.log('4. playSong called with:', song);
     if (!song) return;
 
     try {
-      // If trying to play the same song, just toggle play/pause
       if (currentSongRef.current && currentSongRef.current.id === song.id) {
+        console.log('5. Same song - toggling play/pause');
         await togglePlayPause();
         return;
       }
 
-      // Stop current playback and reset states
+      console.log('6. Playing new song');
       setIsPlaying(false);
       setProgress(0);
       setDuration(0);
       
-      // Update current song state before playing
       setCurrentSong(song);
-      currentSongRef.current = song;  // Explicitly update ref
+      currentSongRef.current = song;
       
-      // Small delay to ensure state is updated
       await new Promise(resolve => setTimeout(resolve, 50));
       
-      // Play the new song
       if (song.source === 'YouTube') {
+        console.log('7. Playing YouTube track:', song.id);
         const success = await youtube.play(song.id);
+        console.log('8. YouTube play success:', success);
         if (success) setIsPlaying(true);
       } else if (song.source === 'Spotify' && song.previewUrl) {
+        console.log('7. Playing Spotify track:', song.previewUrl);
         const success = await spotify.play(song.previewUrl);
+        console.log('8. Spotify play success:', success);
         if (success) setIsPlaying(true);
       }
     } catch (error) {
-      console.error("Error playing song:", error);
+      console.error('9. Error playing song:', error);
       setIsPlaying(false);
       setCurrentSong(null);
     }

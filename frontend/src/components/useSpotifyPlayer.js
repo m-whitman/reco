@@ -23,22 +23,28 @@ export const useSpotifyPlayer = () => {
   }, []);
 
   const play = useCallback(async (previewUrl) => {
-    if (!previewUrl) return false;
+    console.log('10. Spotify player play called with URL:', previewUrl);
+    if (!previewUrl) {
+      console.error('11. No preview URL provided');
+      return false;
+    }
     
     try {
-      // Ensure any previous playback is fully stopped
+      console.log('12. Stopping previous playback');
       await stop();
       
       audioRef.current.src = previewUrl;
       audioRef.current.currentTime = 0;
       
+      console.log('13. Starting new playback');
       playPromiseRef.current = audioRef.current.play();
       await playPromiseRef.current;
+      console.log('14. Playback started successfully');
       isPlayingRef.current = true;
       playPromiseRef.current = null;
       return true;
     } catch (error) {
-      console.error("Error playing Spotify preview:", error);
+      console.error('15. Error playing Spotify preview:', error);
       isPlayingRef.current = false;
       playPromiseRef.current = null;
       return false;
