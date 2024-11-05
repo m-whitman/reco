@@ -11,9 +11,6 @@ async function searchAndGetRecommendations(query) {
       return { error: "No matching track found" };
     }
 
-    console.log("Processed Spotify track:", JSON.stringify(spotifyTrack, null, 2));
-    console.log("YouTube track:", JSON.stringify(youtubeTrack, null, 2));
-
     const [spotifyRecommendations, youtubeRecommendations] = await Promise.all([
       spotifyTrack
         ? spotifyService.getSpotifyRecommendations(spotifyTrack.id, spotifyAccessToken)

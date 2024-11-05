@@ -68,7 +68,6 @@ async function searchYouTube(query) {
       }
     }
 
-    console.log("No available YouTube video found for query:", query);
     return null;
   } catch (error) {
     console.error("Error searching YouTube:", error.message);
@@ -137,7 +136,6 @@ async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) 
     });
 
     const selectedPlaylist = sortedPlaylists[0];
-    console.log(`Selected playlist: ${selectedPlaylist.snippet.title} (${selectedPlaylist.size} tracks)`);
 
     // Function to normalize video titles for comparison
     const normalizeTitle = (title) => {

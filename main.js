@@ -9,7 +9,6 @@ const SPOTIFY_REDIRECT_URI = 'http://localhost:8888/callback'
 
 const TOKEN_PATH = path.join(__dirname, 'spotify_tokens.json');
 
-// Configure the Spotify API client
 const spotifyApi = new SpotifyWebApi({
   clientId: SPOTIFY_CLIENT_ID,
   clientSecret: SPOTIFY_CLIENT_SECRET,
