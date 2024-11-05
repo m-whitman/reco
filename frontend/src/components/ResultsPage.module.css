@@ -236,7 +236,7 @@
   background: rgba(135, 206, 235, 0.1);
   border-radius: 12px;
   padding: 1.5rem;
-  margin: 1.5rem auto;
+  margin: 1.5rem 0;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -258,5 +258,6 @@
 @media (max-width: 768px) {
   .infoCard {
     padding: 1.25rem;
+    margin: 1.5rem auto;
   }
 }
