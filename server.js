@@ -3,8 +3,16 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 
-dotenv.config();
+// Default to 'production' if NODE_ENV is not set
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
+// Log environment for debugging
+console.log('Current environment:', process.env.NODE_ENV);
+
+// Only load .env file in development
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 // Verify required environment variables are set
 const requiredEnvVars = [
@@ -14,10 +22,27 @@ const requiredEnvVars = [
   'YOUTUBE_API_KEY',
 ];
 
-const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+// Log environment for debugging
+console.log('Current environment:', process.env.NODE_ENV);
+
+// Check variables but don't exit in production
+const missingEnvVars = requiredEnvVars.filter(varName => {
+  const value = process.env[varName];
+  if (!value) {
+    console.error(`Warning: Missing ${varName}`);
+    return true;
+  }
+  // Log first few characters for verification
+  console.log(`Found ${varName}: ${value.substring(0, 4)}...`);
+  return false;
+});
+
 if (missingEnvVars.length > 0) {
-  console.error('Missing required environment variables:', missingEnvVars);
-  process.exit(1);
+  console.error('Warning: Missing environment variables:', missingEnvVars);
+  // Only exit in development
+  if (process.env.NODE_ENV !== 'production') {
+    process.exit(1);
+  }
 }
 
 const app = express();
