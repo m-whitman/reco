@@ -5,6 +5,21 @@ const path = require('path');
 
 dotenv.config();
 
+
+// Verify required environment variables are set
+const requiredEnvVars = [
+  'SPOTIFY_CLIENT_ID',
+  'SPOTIFY_CLIENT_SECRET',
+  'SPOTIFY_REDIRECT_URI',
+  'YOUTUBE_API_KEY',
+];
+
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+if (missingEnvVars.length > 0) {
+  console.error('Missing required environment variables:', missingEnvVars);
+  process.exit(1);
+}
+
 const app = express();
 
 app.use(cors());

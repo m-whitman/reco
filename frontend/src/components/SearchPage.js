@@ -21,10 +21,27 @@ function SearchPage() {
       navigate('/results', { state: { results: response.data, query: searchQuery } });
     } catch (error) {
       console.error('Error fetching results:', error);
-      const errorMessage = error.code === 'ERR_CONNECTION_REFUSED' 
-        ? 'Unable to connect to the server. Please make sure the server is running.'
-        : 'An error occurred while fetching results';
-      navigate('/results', { state: { error: errorMessage, query: searchQuery } });
+      let errorMessage;
+      
+      if (error.response) {
+        // Server responded with an error
+        errorMessage = error.response.data.error || 'An error occurred while fetching results';
+        console.error('Server error details:', error.response.data);
+      } else if (error.request) {
+        // Request was made but no response received
+        errorMessage = 'Unable to connect to the server. Please try again later.';
+      } else {
+        // Error in setting up the request
+        errorMessage = 'An error occurred while making the request.';
+      }
+
+      navigate('/results', { 
+        state: { 
+          error: errorMessage, 
+          query: searchQuery,
+          details: error.response?.data?.details
+        } 
+      });
     } finally {
       setLoading(false);
     }
