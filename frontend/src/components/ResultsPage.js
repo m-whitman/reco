@@ -36,20 +36,20 @@ function ResultsPage() {
   }, [stopCurrentSong]);
 
   const handlePlay = (track) => {
-    console.log('1. handlePlay called with track:', track);
-    console.log('2. Track preview URL:', track.previewUrl); // For Spotify tracks
-    
+    console.log(`Playing ${track.source} track:`, track);
+
     // Create queue based on section
     let queueTracks;
     if (track.id === normalizedSpotifyTrack?.id || track.id === normalizedYoutubeTrack?.id) {
+      // If playing from search results section
       queueTracks = [normalizedSpotifyTrack, normalizedYoutubeTrack].filter(Boolean);
     } else {
+      // If playing from recommendations section
       queueTracks = mixedRecommendations.map(item => 
         normalizeTrack(item.track, item.source)
       );
     }
-    
-    console.log('3. Queue tracks:', queueTracks);
+
     updateQueue(queueTracks, track);
     playSong(track);
   };
@@ -58,7 +58,7 @@ function ResultsPage() {
   const getMixedRecommendations = (spotifyRecs, youtubeRecs) => {
     const mixed = [];
     const maxLength = Math.max(spotifyRecs.length, youtubeRecs.length);
-    
+
     for (let i = 0; i < maxLength; i++) {
       // Add Spotify track if available
       if (i < spotifyRecs.length) {
@@ -75,7 +75,7 @@ function ResultsPage() {
         });
       }
     }
-    
+
     // Round down to nearest multiple of 3
     const roundedLength = Math.floor(mixed.length / 3) * 3;
     return mixed.slice(0, roundedLength);
@@ -150,7 +150,7 @@ function ResultsPage() {
     <Layout>
       <div className={styles.container}>
         <h2 className={styles.title}>Search Results for "{query}"</h2>
-        
+
         <div className={styles.infoCard}>
           <span className={styles.infoIcon}>ℹ️</span>
           <p className={styles.infoText}>

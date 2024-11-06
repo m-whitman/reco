@@ -1,51 +1,54 @@
 import { useRef, useCallback } from 'react';
-import { useAudioPlayer } from './useAudioPlayer';
 
 export const useYouTubePlayer = () => {
   const playerRef = useRef(null);
-  const { isPlayingRef } = useAudioPlayer(playerRef);
 
-  const play = useCallback(async (videoId) => {
-    if (!playerRef.current) return false;
-    
+  const play = useCallback((videoId) => {
+    const player = playerRef.current;
+    if (!player) {
+      return false;
+    }
     try {
-      await new Promise((resolve) => {
-        const checkReady = () => {
-          if (playerRef.current?.getPlayerState() !== undefined) {
-            resolve();
-          } else {
-            setTimeout(checkReady, 100);
-          }
-        };
-        checkReady();
-      });
-
       if (videoId) {
-        playerRef.current.loadVideoById(videoId);
+        player.loadVideoById(videoId);
       } else {
-        playerRef.current.playVideo();
+        player.playVideo();
       }
-      isPlayingRef.current = true;
       return true;
     } catch (error) {
       console.error('YouTube play error:', error);
-      isPlayingRef.current = false;
       return false;
     }
-  }, [isPlayingRef]);
+  }, []);
 
-  const stop = useCallback(async () => {
-    if (!playerRef.current) return false;
-    
+  const pause = useCallback(() => {
+    const player = playerRef.current;
+    if (!player) return false;
     try {
-      isPlayingRef.current = false;
-      playerRef.current.stopVideo();
+      player.pauseVideo();
+      return true;
+    } catch (error) {
+      console.error('YouTube pause error:', error);
+      return false;
+    }
+  }, []);
+
+  const stop = useCallback(() => {
+    const player = playerRef.current;
+    if (!player) return false;
+    try {
+      player.stopVideo();
       return true;
     } catch (error) {
       console.error('YouTube stop error:', error);
       return false;
     }
-  }, [isPlayingRef]);
+  }, []);
 
-  return { playerRef, play, stop };
+  return {
+    playerRef,
+    play,
+    pause,
+    stop
+  };
 };
