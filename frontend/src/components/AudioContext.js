@@ -9,7 +9,7 @@ export const AudioProvider = ({ children }) => {
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [queue, setQueue] = useState([]);
-  const [queueIndex, setQueueIndex] = useState(0);
+  const [queueIndex, setQueueIndex] = useState(-1);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [favorites, setFavorites] = useState(() => {
@@ -109,28 +109,37 @@ export const AudioProvider = ({ children }) => {
     if (!song) return;
 
     try {
-      // Stop current playback if any
-      await stopCurrentSong();
-
-      // Set the new current song
-      setCurrentSong(song);
-      setProgress(0);
-      setDuration(0);
-
-      // Start playback based on source
-      let playbackSuccess = false;
-      if (song.source === 'YouTube') {
-        playbackSuccess = await youtube.play(song.id);
-      } else if (song.source === 'Spotify') {
-        playbackSuccess = await spotify.play(song.previewUrl);
+      // If trying to play the same song, just toggle play/pause
+      if (currentSongRef.current && currentSongRef.current.id === song.id) {
+        await togglePlayPause();
+        return;
       }
 
-      setIsPlaying(playbackSuccess);
+      await stopCurrentSong();
+      
+      // Reset states before starting new song
+      setIsPlaying(false);
+      setProgress(0);
+      setDuration(0);
+      
+      setCurrentSong(song);
+
+      // Delay playing to ensure proper state updates
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      if (song.source === 'YouTube') {
+        const success = await youtube.play(song.id);
+        if (success) setIsPlaying(true);
+      } else if (song.source === 'Spotify' && song.previewUrl) {
+        const success = await spotify.play(song.previewUrl);
+        if (success) setIsPlaying(true);
+      }
     } catch (error) {
       console.error("Error playing song:", error);
       setIsPlaying(false);
+      setCurrentSong(null);
     }
-  }, [stopCurrentSong, youtube, spotify]);
+  }, [youtube, spotify, stopCurrentSong, togglePlayPause]);
 
   const togglePlayPause = useCallback(async () => {
     if (!currentSong) return;
@@ -228,9 +237,28 @@ export const AudioProvider = ({ children }) => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [youtube, spotify]);
 
-  const handleYouTubeStateChange = useCallback((isPlaying) => {
-    setIsPlaying(isPlaying);
-  }, []);
+  const handleYouTubeStateChange = useCallback((state) => {
+    const song = currentSongRef.current;
+    if (song?.source === 'YouTube') {
+      if (state === 0) { // Video ended
+        if (queueIndex < queue.length - 1) {
+          playNext();
+        } else {
+          setIsPlaying(false);
+          setCurrentSong(null);
+          setProgress(0);
+          setDuration(0);
+        }
+      } else if (state === 1) { // Playing
+        setIsPlaying(true);
+        if (youtube.playerRef.current) {
+          setDuration(youtube.playerRef.current.getDuration());
+        }
+      } else if (state === 2) { // Paused
+        setIsPlaying(false);
+      }
+    }
+  }, [queueIndex, queue, playNext, youtube.playerRef]);
 
   return (
     <AudioContext.Provider value={{ 

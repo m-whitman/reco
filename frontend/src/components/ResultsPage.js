@@ -24,16 +24,9 @@ function ResultsPage() {
     toggleFavorite, 
     favorites,
     isFavorite,
-    updateQueue,
-    stopCurrentSong
+    updateQueue
   } = useAudio();
   const { results, error, query } = location.state || {};
-
-  useEffect(() => {
-    return () => {
-      stopCurrentSong();
-    };
-  }, [stopCurrentSong]);
 
   const handlePlay = (track) => {
     console.log(`Playing ${track.source} track:`, track);
