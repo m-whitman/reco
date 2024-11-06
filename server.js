@@ -22,8 +22,8 @@ const requiredEnvVars = [
   'YOUTUBE_API_KEY',
 ];
 
-// Log environment for debugging
-console.log('Current environment:', process.env.NODE_ENV);
+// Log all environment variables (be careful with sensitive data)
+console.log('Available environment variables:', Object.keys(process.env));
 
 // Check variables but don't exit in production
 const missingEnvVars = requiredEnvVars.filter(varName => {
