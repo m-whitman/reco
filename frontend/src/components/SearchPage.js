@@ -16,12 +16,15 @@ function SearchPage() {
   const handleSearch = async (searchQuery) => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8888/api/search?query=${encodeURIComponent(searchQuery)}`);
+      const response = await axios.get(`/api/search?query=${encodeURIComponent(searchQuery)}`);
       addToSearchHistory(searchQuery);
       navigate('/results', { state: { results: response.data, query: searchQuery } });
     } catch (error) {
       console.error('Error fetching results:', error);
-      navigate('/results', { state: { error: 'An error occurred while fetching results', query: searchQuery } });
+      const errorMessage = error.code === 'ERR_CONNECTION_REFUSED' 
+        ? 'Unable to connect to the server. Please make sure the server is running.'
+        : 'An error occurred while fetching results';
+      navigate('/results', { state: { error: errorMessage, query: searchQuery } });
     } finally {
       setLoading(false);
     }
