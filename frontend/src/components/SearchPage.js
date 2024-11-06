@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Search, Clock, Loader } from "lucide-react";
 import Layout from "./Layout";
-import { useAudio } from "./AudioContext";
+import { useAudio } from "../contexts/AudioContext";
 import styles from "./SearchPage.module.css";
 import logo from "../images/reco.jpg";
 

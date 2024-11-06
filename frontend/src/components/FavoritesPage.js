@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './FavoritesPage.module.css';
 import Layout from './Layout';
-import { useAudio } from './AudioContext';
+import { useAudio } from "../contexts/AudioContext";
 import TrackCard from './TrackCard';
 
 function FavoritesPage() {
