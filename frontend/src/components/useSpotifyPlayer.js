@@ -1,52 +1,23 @@
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback } from 'react';
 
 export const useSpotifyPlayer = () => {
   const audioRef = useRef(new Audio());
-  const playPromiseRef = useRef(null);
-
-  useEffect(() => {
-    return () => {
-      if (playPromiseRef.current) {
-        playPromiseRef.current.then(() => {
-          audioRef.current.pause();
-          audioRef.current.src = '';
-        }).catch(() => {});
-      } else {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-      }
-    };
-  }, []);
 
   const play = useCallback(async (previewUrl) => {
     if (!previewUrl) return false;
 
     try {
-      if (playPromiseRef.current) {
-        await playPromiseRef.current;
-      }
-
-      if (audioRef.current.src !== previewUrl) {
-        audioRef.current.src = previewUrl;
-        audioRef.current.currentTime = 0;
-      }
-
-      playPromiseRef.current = audioRef.current.play();
-      await playPromiseRef.current;
-      playPromiseRef.current = null;
+      audioRef.current.src = previewUrl;
+      await audioRef.current.play();
       return true;
     } catch (error) {
       console.error("Error playing Spotify preview:", error);
-      playPromiseRef.current = null;
       return false;
     }
   }, []);
 
-  const pause = useCallback(async () => {
+  const pause = useCallback(() => {
     try {
-      if (playPromiseRef.current) {
-        await playPromiseRef.current;
-      }
       audioRef.current.pause();
       return true;
     } catch (error) {
@@ -55,11 +26,8 @@ export const useSpotifyPlayer = () => {
     }
   }, []);
 
-  const stop = useCallback(async () => {
+  const stop = useCallback(() => {
     try {
-      if (playPromiseRef.current) {
-        await playPromiseRef.current;
-      }
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       audioRef.current.src = '';
@@ -73,19 +41,15 @@ export const useSpotifyPlayer = () => {
   const setupAudioListeners = useCallback((handlers) => {
     const { onPlay, onPause, onEnded } = handlers;
 
-    const cleanup = () => {
-      audioRef.current.removeEventListener('play', onPlay);
-      audioRef.current.removeEventListener('pause', onPause);
-      audioRef.current.removeEventListener('ended', onEnded);
-    };
-
-    cleanup();
-
     audioRef.current.addEventListener('play', onPlay);
     audioRef.current.addEventListener('pause', onPause);
     audioRef.current.addEventListener('ended', onEnded);
 
-    return cleanup;
+    return () => {
+      audioRef.current.removeEventListener('play', onPlay);
+      audioRef.current.removeEventListener('pause', onPause);
+      audioRef.current.removeEventListener('ended', onEnded);
+    };
   }, []);
 
   return {
