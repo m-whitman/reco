@@ -5,14 +5,14 @@ import { useSpotifyPlayer } from '../hooks/useSpotifyPlayer';
 import { useAudioStorage } from '../hooks/useAudioStorage';
 import { useAudioState } from './hooks/useAudioState';
 import { useQueueState } from './hooks/useQueueState';
-import { useFavoriteState } from './hooks/useFavoriteState';
+import { useFavoritesState } from './hooks/useFavoriteState';
 import { useProgressTracking } from './hooks/useProgressTracking';
 import { useAudioControls } from './hooks/useAudioControls';
 
 export const AudioProvider = ({ children }) => {
   const audioState = useAudioState();
   const queueState = useQueueState();
-  const favoritesState = useFavoriteState();
+  const favoritesState = useFavoritesState();
   
   const youtube = useYouTubePlayer();
   const spotify = useSpotifyPlayer();
