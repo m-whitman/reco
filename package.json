@@ -31,5 +31,8 @@
     "soundcloud-searcher": "^0.3.1",
     "spotify-web-api-node": "^5.0.2",
     "youtube-search-without-api-key": "^2.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

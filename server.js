@@ -45,9 +45,21 @@ if (missingEnvVars.length > 0) {
   }
 }
 
+// Add this after your environment variable setup
+if (process.env.NODE_ENV === 'production') {
+  process.env.SPOTIFY_REDIRECT_URI = 'https://reco-production.up.railway.app/callback';
+}
+
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://reco-production.up.railway.app',
+    'http://localhost:3000',
+    'http://localhost:8888'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // Import routes
