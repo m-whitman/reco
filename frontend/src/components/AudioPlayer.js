@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Play, Pause, ExternalLink, SkipBack, SkipForward } from "lucide-react";
 import { FaSpotify, FaYoutube } from "react-icons/fa";
-import { useAudio } from './AudioContext';
+import { useAudio } from '../contexts/AudioContext';
 import YouTubePlayer from './YouTubePlayer';
 import styles from './AudioPlayer.module.css';
 

@@ -4,7 +4,7 @@ import Layout from "./Layout";
 import AudioPlayer from "./AudioPlayer";
 import FavoritesSidebar from "./FavoritesSidebar";
 import TrackCard from "./TrackCard";
-import { useAudio } from "./AudioContext";
+import { useAudio } from "../contexts/AudioContext";
 import styles from "./ResultsPage.module.css";
 
 function ResultsPage() {
