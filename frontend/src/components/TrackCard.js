@@ -30,38 +30,28 @@ function TrackCard({
     return <div>No track data available</div>;
   }
 
-  const handlePlay = (e) => {
-    e.stopPropagation();
-    const normalizedTrack = {
+  const normalizeTrack = (track) => {
+    return {
       ...track,
       id: trackId,
-      name: trackName,
-      imageUrl: trackImage,
+      name: track.name || track.title,
+      imageUrl: track.imageUrl || track.thumbnail,
       url: track.url,
-      artist: trackArtist,
+      artist: track.artist || track.channelTitle,
       source: source,
       previewUrl: track.previewUrl
     };
-    
-    // If this is the current track, we want to toggle play/pause
-    // If it's a different track, we want to start playing it
-    onPlay(normalizedTrack);
+  };
+
+  const handlePlay = (e) => {
+    e.stopPropagation();
+    onPlay(normalizeTrack(track));
   };
 
   const handleToggleFavorite = (e) => {
     e.stopPropagation();
-    
-    const normalizedTrack = {
-      ...track,
-      id: trackId,
-      name: trackName,
-      imageUrl: trackImage,
-      url: track.url,
-      artist: trackArtist,
-      source: source,
-      previewUrl: track.previewUrl
-    };
-    onToggleFavorite(normalizedTrack);
+    e.preventDefault();
+    onToggleFavorite(normalizeTrack(track));
   };
 
   const getExternalUrl = (track) => {
@@ -148,4 +138,4 @@ function TrackCard({
   );
 }
 
-export default TrackCard;
+export default React.memo(TrackCard);

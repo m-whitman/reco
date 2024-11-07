@@ -162,7 +162,7 @@ function ResultsPage() {
                 onToggleFavorite={toggleFavorite}
                 isPlaying={isPlaying && currentSong?.id === normalizedSpotifyTrack.id}
                 isCurrentTrack={currentSong?.id === normalizedSpotifyTrack.id}
-                isFavorite={isFavorite(normalizedSpotifyTrack.id)}
+                isFavorite={isFavorite(normalizedSpotifyTrack)}
               />
             )}
             {normalizedYoutubeTrack && (
@@ -173,7 +173,7 @@ function ResultsPage() {
                 onToggleFavorite={toggleFavorite}
                 isPlaying={isPlaying && currentSong?.id === normalizedYoutubeTrack.id}
                 isCurrentTrack={currentSong?.id === normalizedYoutubeTrack.id}
-                isFavorite={isFavorite(normalizedYoutubeTrack.id)}
+                isFavorite={isFavorite(normalizedYoutubeTrack)}
               />
             )}
           </div>
@@ -182,18 +182,21 @@ function ResultsPage() {
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>Recommended Tracks</h3>
           <div className={styles.grid}>
-            {mixedRecommendations.map(item => (
-              <TrackCard
-                key={`${item.source}-${item.track.id}`}
-                track={normalizeTrack(item.track, item.source)}
-                source={item.source}
-                onPlay={handlePlay}
-                onToggleFavorite={toggleFavorite}
-                isPlaying={isPlaying && currentSong?.id === normalizeTrack(item.track, item.source).id}
-                isCurrentTrack={currentSong?.id === normalizeTrack(item.track, item.source).id}
-                isFavorite={isFavorite(item.track.id)}
-              />
-            ))}
+            {mixedRecommendations.map(item => {
+              const normalizedTrack = normalizeTrack(item.track, item.source);
+              return (
+                <TrackCard
+                  key={`${item.source}-${normalizedTrack.id}`}
+                  track={normalizedTrack}
+                  source={item.source}
+                  onPlay={handlePlay}
+                  onToggleFavorite={toggleFavorite}
+                  isPlaying={isPlaying && currentSong?.id === normalizedTrack.id}
+                  isCurrentTrack={currentSong?.id === normalizedTrack.id}
+                  isFavorite={isFavorite(normalizedTrack)}
+                />
+              );
+            })}
           </div>
         </div>
       </div>

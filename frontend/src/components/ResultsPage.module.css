@@ -125,7 +125,7 @@
 }
 
 .favoriteIcon.favorited {
-  color: #ff4444 !important;
+  color: #ff4444;
 }
 
 .favoriteButton:hover .favoriteIcon {
@@ -133,7 +133,7 @@
 }
 
 .favoriteButton:hover .favoriteIcon.favorited {
-  color: #ff6666 !important;
+  color: #ff6666;
 }
 
 .sourceTag {
