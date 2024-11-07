@@ -3,55 +3,23 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 
-// Default to 'production' if NODE_ENV is not set
+// Environment setup
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
-
-// Log environment for debugging
 console.log('Current environment:', process.env.NODE_ENV);
 
-// Only load .env file in development
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
 }
 
-// Verify required environment variables are set
-const requiredEnvVars = [
-  'SPOTIFY_CLIENT_ID',
-  'SPOTIFY_CLIENT_SECRET',
-  'SPOTIFY_REDIRECT_URI',
-  'YOUTUBE_API_KEY',
-];
-
-// Log all environment variables (be careful with sensitive data)
-console.log('Available environment variables:', Object.keys(process.env));
-
-// Check variables but don't exit in production
-const missingEnvVars = requiredEnvVars.filter(varName => {
-  const value = process.env[varName];
-  if (!value) {
-    console.error(`Warning: Missing ${varName}`);
-    return true;
-  }
-  // Log first few characters for verification
-  console.log(`Found ${varName}: ${value.substring(0, 4)}...`);
-  return false;
-});
-
-if (missingEnvVars.length > 0) {
-  console.error('Warning: Missing environment variables:', missingEnvVars);
-  // Only exit in development
-  if (process.env.NODE_ENV !== 'production') {
-    process.exit(1);
-  }
-}
-
-// Add this after your environment variable setup
-if (process.env.NODE_ENV === 'production') {
-  process.env.SPOTIFY_REDIRECT_URI = 'https://reco-production.up.railway.app/callback';
-}
-
 const app = express();
 
+// Basic error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
+// CORS configuration
 app.use(cors({
   origin: [
     'https://reco-production.up.railway.app',
@@ -60,32 +28,27 @@ app.use(cors({
   ],
   credentials: true
 }));
+
 app.use(express.json());
 
-// Add this before your other routes
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'ok',
-    environment: process.env.NODE_ENV,
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Import routes
+// API routes
 const searchRoutes = require('./searchRouter');
-
-// Use routes
 app.use('/api/search', searchRoutes);
 
-// Serve static files from React build
+// Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 
 // Handle React routing, return all requests to React app
-app.get('*', (req, res) => {
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
   res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
 });
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 8888;
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
+}).on('error', (err) => {
+  console.error('Server failed to start:', err);
 });
