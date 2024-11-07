@@ -46,6 +46,20 @@ export const AudioProvider = ({ children }) => {
     return cleanup;
   }, [spotify, audioState, queueState]);
 
+  const handlePlayNext = async () => {
+    const nextTrack = await queueState.playNext();
+    if (nextTrack) {
+      await audioControls.playSong(nextTrack);
+    }
+  };
+
+  const handlePlayPrevious = async () => {
+    const previousTrack = await queueState.playPrevious();
+    if (previousTrack) {
+      await audioControls.playSong(previousTrack);
+    }
+  };
+
   const contextValue = {
     ...audioState,
     ...audioControls,
@@ -53,6 +67,8 @@ export const AudioProvider = ({ children }) => {
     ...favoritesState,
     youtubePlayerRef: youtube.playerRef,
     ...storage,
+    playNext: handlePlayNext,
+    playPrevious: handlePlayPrevious
   };
 
   return (
