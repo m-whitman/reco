@@ -19,7 +19,7 @@ COPY . .
 RUN cd frontend && npm run build
 
 # Default port (will be overridden by Railway)
-ENV PORT=8888
+ENV PORT=8080
 
 # Expose port
 EXPOSE ${PORT}

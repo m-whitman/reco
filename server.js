@@ -56,7 +56,11 @@ app.get('*', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
 });
 
-const PORT = process.env.PORT || 8888;
+// Use Railway's PORT environment variable
+const PORT = process.env.PORT || 8080;
+
+console.log('Starting server with PORT:', PORT);
+console.log('Environment PORT value:', process.env.PORT);
 
 // More robust server startup
 const server = app.listen(PORT, '0.0.0.0', () => {
