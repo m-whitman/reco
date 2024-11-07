@@ -1,47 +1,42 @@
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const path = require('path');
 
 // Environment setup
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 console.log('Current environment:', process.env.NODE_ENV);
-console.log('Available environment variables:', Object.keys(process.env));
-
-if (process.env.NODE_ENV !== 'production') {
-  dotenv.config();
-}
 
 const app = express();
 
-// Enhanced error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error occurred:', err);
-  console.error('Stack trace:', err.stack);
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
+// CORS configuration with Railway domains
+app.use(cors({
+  origin: [
+    process.env.RAILWAY_PUBLIC_DOMAIN,
+    process.env.RAILWAY_PRIVATE_DOMAIN,
+    'https://reco-production.up.railway.app',
+    'http://localhost:3000',
+    'http://localhost:8888'
+  ].filter(Boolean),
+  credentials: true
+}));
 
-// CORS configuration
-app.use(cors());
 app.use(express.json());
 
-// Basic logging middleware
+// Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - ${req.headers.host}`);
   next();
 });
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  console.log('Health check requested');
+  console.log('Health check requested from:', req.headers.host);
   res.status(200).json({ 
     status: 'ok',
     environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString(),
-    port: process.env.PORT
+    domain: req.headers.host,
+    railway_domain: process.env.RAILWAY_PUBLIC_DOMAIN
   });
 });
 
@@ -52,7 +47,7 @@ app.use('/api/search', searchRoutes);
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 
-// Handle React routing, return all requests to React app
+// Handle React routing
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api/')) {
     return next();
@@ -66,7 +61,8 @@ const PORT = process.env.PORT || 8888;
 // More robust server startup
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Health check available at http://localhost:${PORT}/health`);
+  console.log(`Public domain: ${process.env.RAILWAY_PUBLIC_DOMAIN}`);
+  console.log(`Private domain: ${process.env.RAILWAY_PRIVATE_DOMAIN}`);
 }).on('error', (err) => {
   console.error('Server failed to start:', err);
   process.exit(1);
@@ -79,14 +75,4 @@ process.on('SIGTERM', () => {
     console.log('Server closed');
     process.exit(0);
   });
-});
-
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught exception:', err);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
 });

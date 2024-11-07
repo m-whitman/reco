@@ -18,12 +18,11 @@ COPY . .
 # Build frontend
 RUN cd frontend && npm run build
 
-# Expose port (match with $PORT from Railway)
-EXPOSE $PORT
+# Default port (will be overridden by Railway)
+ENV PORT=8888
 
-# Add healthcheck
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:$PORT/health || exit 1
+# Expose port
+EXPOSE ${PORT}
 
-# Start command with explicit host binding
+# Start command
 CMD ["sh", "-c", "node server.js"]
