@@ -25,10 +25,12 @@ export const useFavoritesState = () => {
     
     setFavorites(prevFavorites => {
       const isFavorited = prevFavorites.some(fav => fav.id === song.id);
-      if (isFavorited) {
-        return prevFavorites.filter(fav => fav.id !== song.id);
-      }
-      return [...prevFavorites, { ...song }];
+      const newFavorites = isFavorited
+        ? prevFavorites.filter(fav => fav.id !== song.id)
+        : [...prevFavorites, { ...song }];
+      
+      // Force a re-render by creating a new array
+      return [...newFavorites];
     });
   }, []);
 
