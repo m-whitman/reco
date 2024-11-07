@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "build": "cd frontend && npm install && npm run build && cd ..",
-    "dev": "nodemon server.js"
+    "dev": "NODE_ENV=development nodemon server.js",
+    "dev:windows": "set NODE_ENV=development&& nodemon server.js"
   },
   "keywords": [],
   "author": "",
