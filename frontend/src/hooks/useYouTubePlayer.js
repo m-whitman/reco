@@ -1,60 +1,25 @@
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback } from 'react';
 
 export const useYouTubePlayer = () => {
   const playerRef = useRef(null);
   const stateHandlersRef = useRef({
-    onReady: null,
-    onStateChange: null,
-    onError: null
+    onStateChange: null
   });
 
-  const setupEventHandlers = useCallback(({ onReady, onStateChange, onError }) => {
-    stateHandlersRef.current = {
-      onReady,
-      onStateChange,
-      onError
-    };
-  }, []);
-
-  useEffect(() => {
-    // This function will be called by the YouTube IFrame API
-    window.onYouTubePlayerStateChange = (event) => {
-      if (stateHandlersRef.current.onStateChange) {
-        stateHandlersRef.current.onStateChange(event);
-      }
-    };
-
-    return () => {
-      window.onYouTubePlayerStateChange = null;
-    };
+  const setupEventHandlers = useCallback(({ onStateChange }) => {
+    if (onStateChange) {
+      stateHandlersRef.current.onStateChange = onStateChange;
+    }
   }, []);
 
   const play = useCallback(async (videoId) => {
     const player = playerRef.current;
-    if (!player) {
-      return false;
-    }
+    if (!player) return false;
+    
     try {
       if (videoId) {
-        // Return a promise that resolves when the video is ready
-        return new Promise((resolve) => {
-          const onStateChange = (event) => {
-            // YouTube states: -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (video cued)
-            if (event.data === 1) { // Playing
-              if (stateHandlersRef.current.onStateChange) {
-                stateHandlersRef.current.onStateChange(event);
-              }
-              resolve(true);
-            } else if (event.data === -1 || event.data === 3) { // Unstarted or Buffering
-              // Wait for it to start playing
-            } else {
-              resolve(false);
-            }
-          };
-
-          player.addEventListener('onStateChange', onStateChange);
-          player.loadVideoById(videoId);
-        });
+        player.loadVideoById(videoId);
+        return true;
       } else {
         player.playVideo();
         return true;

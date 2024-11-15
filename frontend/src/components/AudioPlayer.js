@@ -14,7 +14,7 @@ const AudioPlayer = () => {
     togglePlayPause, 
     seekTo,
     youtubePlayerRef,
-    setIsPlaying,
+    handleYouTubeStateChange,
     playNext,
     playPrevious,
     hasNext,
@@ -143,11 +143,11 @@ const AudioPlayer = () => {
         </div>
       </div>
       
-      {currentSong.source === 'YouTube' && (
+      {currentSong?.source === 'YouTube' && (
         <YouTubePlayer 
           videoId={currentSong.id} 
           ref={youtubePlayerRef}
-          onStateChange={setIsPlaying}
+          onStateChange={handleYouTubeStateChange}
         />
       )}
     </div>

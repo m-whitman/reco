@@ -1,10 +1,11 @@
-import React, { forwardRef, useImperativeHandle, useState, useCallback } from 'react';
+import React, { forwardRef, useImperativeHandle, useState, useCallback, useRef } from 'react';
 import YouTube from 'react-youtube';
 
 const YouTubePlayer = forwardRef((props, ref) => {
   const { videoId, onStateChange } = props;
   const [player, setPlayer] = useState(null);
-  
+  const lastStateRef = useRef(null);
+
   const opts = {
     height: '0',
     width: '0',
@@ -14,14 +15,11 @@ const YouTubePlayer = forwardRef((props, ref) => {
       enablejsapi: 1,
       origin: window.location.origin,
       rel: 0,
-      // Disable analytics and tracking features
       modestbranding: 1,
       disablekb: 1,
       fs: 0,
       hl: 'en',
-      // Disable annotations and info cards
       iv_load_policy: 3,
-      // Use privacy-enhanced mode
       host: 'https://www.youtube-nocookie.com',
     },
   };
@@ -42,10 +40,9 @@ const YouTubePlayer = forwardRef((props, ref) => {
   }, [videoId]);
 
   const handleStateChange = useCallback((event) => {
-    const playerState = event.data;
-    
-    if (onStateChange) {
-      onStateChange(playerState);
+    if (lastStateRef.current !== event.data) {
+      lastStateRef.current = event.data;
+      onStateChange(event);
     }
   }, [onStateChange]);
 
