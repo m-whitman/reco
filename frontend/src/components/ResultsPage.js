@@ -29,8 +29,6 @@ function ResultsPage() {
   const { results, error, query } = location.state || {};
 
   const handlePlay = (track) => {
-    console.log(`Playing ${track.source} track:`, track);
-
     // Create queue based on section
     let queueTracks;
     if (track.id === normalizedSpotifyTrack?.id || track.id === normalizedYoutubeTrack?.id) {
