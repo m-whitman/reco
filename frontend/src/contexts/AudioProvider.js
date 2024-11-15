@@ -33,7 +33,10 @@ export const AudioProvider = ({ children }) => {
       onPause: () => audioState.setIsPlaying(false),
       onEnded: async () => {
         if (queueState.hasNext) {
-          await queueState.playNext();
+          const nextTrack = await queueState.playNext();
+          if (nextTrack) {
+            await audioControls.playSong(nextTrack);
+          }
         } else {
           audioState.setIsPlaying(false);
           audioState.setCurrentSong(null);
@@ -45,6 +48,58 @@ export const AudioProvider = ({ children }) => {
 
     return cleanup;
   }, [spotify, audioState, queueState]);
+
+  // Add YouTube event handlers
+  React.useEffect(() => {
+    const handleYouTubeStateChange = async (event) => {
+      // YouTube states: -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (video cued)
+      switch (event.data) {
+        case 0: // ended
+          if (queueState.hasNext) {
+            const nextTrack = await queueState.playNext();
+            if (nextTrack) {
+              await audioControls.playSong(nextTrack);
+            }
+          } else {
+            audioState.setIsPlaying(false);
+            audioState.setCurrentSong(null);
+            audioState.setProgress(0);
+            audioState.setDuration(0);
+          }
+          break;
+        case 1: // playing
+          audioState.setIsPlaying(true);
+          break;
+        case 2: // paused
+          audioState.setIsPlaying(false);
+          break;
+        case 3: // buffering
+          // Do nothing while buffering
+          break;
+        default:
+          // Handle any other states (-1: unstarted, 5: video cued)
+          break;
+      }
+    };
+
+    if (youtube.playerRef.current && youtube.playerRef.current.addEventListener) {
+      try {
+        youtube.playerRef.current.addEventListener('onStateChange', handleYouTubeStateChange);
+      } catch (error) {
+        console.warn('Error adding YouTube event listener:', error);
+      }
+    }
+
+    return () => {
+      if (youtube.playerRef.current && youtube.playerRef.current.removeEventListener) {
+        try {
+          youtube.playerRef.current.removeEventListener('onStateChange', handleYouTubeStateChange);
+        } catch (error) {
+          console.warn('Error removing YouTube event listener:', error);
+        }
+      }
+    };
+  }, [youtube.playerRef, audioState, queueState, audioControls]);
 
   const handlePlayNext = async () => {
     const nextTrack = await queueState.playNext();

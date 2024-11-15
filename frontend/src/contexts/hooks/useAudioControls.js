@@ -64,7 +64,12 @@ export const useAudioControls = ({
       }
 
       await stopCurrentSong();
-      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      if (song.source === 'YouTube') {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
       
       setCurrentSong(song);
       setProgress(0);
