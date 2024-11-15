@@ -1,12 +1,5 @@
 import React, { useRef } from "react";
-import {
-  Play,
-  Pause,
-  ExternalLink,
-  SkipBack,
-  SkipForward,
-  Loader,
-} from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Loader } from "lucide-react";
 import { FaSpotify, FaYoutube } from "react-icons/fa";
 import { useAudio } from "../contexts/AudioContext";
 import YouTubePlayer from "./YouTubePlayer";
@@ -62,39 +55,40 @@ const AudioPlayer = () => {
   return (
     <div className={styles.audioPlayerContainer}>
       <div className={styles.audioPlayerContent}>
-        <div className={styles.songInfoContainer}>
-          <div className={styles.imageContainer}>
-            <img
-              src={currentSong.imageUrl}
-              alt={currentSong.name || currentSong.title}
-              className={styles.songImage}
-            />
-            {isBuffering && (
-              <div className={styles.bufferingOverlay}>
-                <Loader className={styles.spinner} size={24} />
-              </div>
-            )}
-            <a
-              href={getExternalUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.sourceLink}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {currentSong.source === "YouTube" ? (
-                <FaYoutube style={{ color: "#FF0000" }} />
-              ) : (
-                <FaSpotify style={{ color: "#1DB954" }} />
+        <a
+          href={getExternalUrl()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.songInfoLink}
+        >
+          <div className={styles.songInfoContainer}>
+            <div className={styles.imageContainer}>
+              <img
+                src={currentSong.imageUrl}
+                alt={currentSong.name || currentSong.title}
+                className={styles.songImage}
+              />
+              {isBuffering && (
+                <div className={styles.bufferingOverlay}>
+                  <Loader className={styles.spinner} size={24} />
+                </div>
               )}
-            </a>
+              <div className={styles.sourceLink}>
+                {currentSong.source === "YouTube" ? (
+                  <FaYoutube style={{ color: "#FF0000" }} />
+                ) : (
+                  <FaSpotify style={{ color: "#1DB954" }} />
+                )}
+              </div>
+            </div>
+            <div className={styles.songInfo}>
+              <h3 className={styles.songTitle}>
+                {currentSong.name || currentSong.title}
+              </h3>
+              <p className={styles.songArtist}>{currentSong.artist}</p>
+            </div>
           </div>
-          <div className={styles.songInfo}>
-            <h3 className={styles.songTitle}>
-              {currentSong.name || currentSong.title}
-            </h3>
-            <p className={styles.songArtist}>{currentSong.artist}</p>
-          </div>
-        </div>
+        </a>
 
         <div className={styles.playerControls}>
           <div className={styles.controlButtons}>
@@ -156,9 +150,7 @@ const AudioPlayer = () => {
             rel="noopener noreferrer"
             className={styles.externalLink}
             aria-label="Open in external player"
-          >
-            <ExternalLink size={20} />
-          </a>
+          ></a>
         </div>
       </div>
 

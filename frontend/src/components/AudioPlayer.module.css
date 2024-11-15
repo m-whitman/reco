@@ -176,15 +176,6 @@
   margin-top: 0.25rem;
 }
 
-.externalLink {
-  color: #B8A7D9;
-  transition: color 0.2s ease;
-}
-
-.externalLink:hover {
-  color: #fff;
-}
-
 .youtubePlayerContainer {
   display: none;
 }
@@ -333,4 +324,14 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px;
+}
+
+.songInfoLink {
+  text-decoration: none;
+  color: inherit;
+}
+
+.songInfoLink:hover .songTitle {
+  text-decoration: underline;
+  text-decoration-color: #fff;
 }
