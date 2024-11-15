@@ -1,7 +1,9 @@
 import { createContext, useContext } from 'react';
 import { AudioProvider } from './AudioProvider';
 
-const AudioContext = createContext();
+const AudioContext = createContext({
+  isBuffering: false,
+});
 
 export { AudioProvider };
 
