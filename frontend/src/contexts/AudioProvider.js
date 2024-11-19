@@ -9,6 +9,7 @@ import { useYouTubePlayer } from "../hooks/useYouTubePlayer";
 import { useSpotifyPlayer } from "../hooks/useSpotifyPlayer";
 import { useAudioStorage } from "../hooks/useAudioStorage";
 import logger from "../utils/logger";
+import { isMobileDevice } from '../utils/deviceDetection';
 
 export const AudioProvider = ({ children }) => {
   const [isBuffering, setIsBuffering] = React.useState(false);
@@ -65,6 +66,7 @@ export const AudioProvider = ({ children }) => {
   }, [spotify, audioState, queueState, audioControls]);
 
   const handleYouTubeStateChange = async (event) => {
+    const isMobile = isMobileDevice();
     const stateMap = {
       "-1": "unstarted",
       0: "ended",
@@ -81,6 +83,8 @@ export const AudioProvider = ({ children }) => {
           track: audioState.currentSong,
           state: stateMap[event.data],
         });
+        
+        // Handle end event for both mobile and desktop
         if (queueState.hasNext) {
           const nextTrack = await queueState.playNext();
           if (nextTrack) {
@@ -92,6 +96,12 @@ export const AudioProvider = ({ children }) => {
           audioState.setCurrentSong(null);
           audioState.setProgress(0);
           audioState.setDuration(0);
+          
+          // For mobile, explicitly stop and clean up the player
+          if (isMobile && youtube.playerRef.current) {
+            youtube.playerRef.current.stopVideo();
+            youtube.playerRef.current.clearVideo();
+          }
         }
         break;
       case 1: // playing

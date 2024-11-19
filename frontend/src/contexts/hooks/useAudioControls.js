@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { isMobileDevice } from '../../utils/deviceDetection';
 
 export const useAudioControls = ({
   currentSongRef,
@@ -15,6 +16,9 @@ export const useAudioControls = ({
     try {
       if (song.source === 'YouTube') {
         await youtube.stop();
+        if (isMobileDevice()) {
+          youtube.playerRef.current?.clearVideo();
+        }
       } else {
         spotify.stop();
       }

@@ -1,4 +1,5 @@
 import { useRef, useCallback } from 'react';
+import { isMobileDevice } from '../utils/deviceDetection';
 
 export const useYouTubePlayer = () => {
   const playerRef = useRef(null);
@@ -42,11 +43,14 @@ export const useYouTubePlayer = () => {
     }
   }, []);
 
-  const stop = useCallback(() => {
+  const stop = useCallback(async () => {
     const player = playerRef.current;
     if (!player) return false;
     try {
       player.stopVideo();
+      if (isMobileDevice()) {
+        player.clearVideo();
+      }
       return true;
     } catch (error) {
       console.error('YouTube stop error:', error);
