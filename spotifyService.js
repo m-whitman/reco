@@ -63,13 +63,13 @@ async function searchSpotify(query, accessToken) {
 async function getSpotifyRecommendations(trackId, accessToken) {
   try {
     const response = await axios.get(
-      `https://api.spotify.com/v1/recommendations?seed_tracks=${trackId}&limit=50`, // Increased to 50 to get more potential tracks
+      `https://api.spotify.com/v1/recommendations?seed_tracks=${trackId}&limit=45`,
       {
         headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
 
-    // Filter tracks with preview URLs but don't limit to 5 anymore
+    // Filter tracks with preview URLs but don't limit
     const recommendations = response.data.tracks
       .filter(track => track.preview_url)
       .map((track) => ({

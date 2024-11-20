@@ -99,9 +99,9 @@ async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) 
 
     const searchResponse = await youtube.search.list({
       part: "snippet",
-      q: `${query} playlist`,
+      q: `${artistName} ${searchedVideoTitle} similar songs playlist`,
       type: "playlist",
-      maxResults: 10,
+      maxResults: 15,
       key: process.env.YOUTUBE_API_KEY,
     });
 
@@ -111,29 +111,173 @@ async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) 
       return [];
     }
 
-    // Get sizes for all playlists and sort by size
-    const playlistsWithSize = await Promise.all(
+    // Enhanced relevance scoring
+    const playlistsWithScore = await Promise.all(
       playlists.map(async (playlist) => {
         const size = await getPlaylistSize(playlist.id.playlistId);
+        const title = ` ${playlist.snippet.title.toLowerCase()} `;
+        const description = ` ${playlist.snippet.description.toLowerCase()} `;
+        const artistLower = artistName.toLowerCase();
+        const songLower = searchedVideoTitle.toLowerCase();
+        
+        // Helper function for complete word matches (moved outside the isValid check)
+        const hasCompleteMatch = (text, search) => {
+          const searchTerms = search.split(' ');
+          return searchTerms.length > 0 && text.includes(` ${search} `);
+        };
+        
+        // Check playlist contents
+        let containsSearchedSong = false;
+        let artistSongCount = 0;
+        let validPlaylistItems = [];
+        
+        try {
+          const playlistItemsResponse = await youtube.playlistItems.list({
+            part: "snippet",
+            playlistId: playlist.id.playlistId,
+            maxResults: 50,
+            key: process.env.YOUTUBE_API_KEY,
+          });
+          
+          // Get video IDs for duration check
+          const videoIds = playlistItemsResponse.data.items.map(item => 
+            item.snippet.resourceId.videoId
+          );
+          
+          // Get video durations in batch
+          const videosResponse = await youtube.videos.list({
+            part: "contentDetails",
+            id: videoIds.join(','),
+            key: process.env.YOUTUBE_API_KEY,
+          });
+          
+          // Create duration lookup map
+          const durationMap = {};
+          videosResponse.data.items.forEach(video => {
+            durationMap[video.id] = video.contentDetails.duration;
+          });
+          
+          playlistItemsResponse.data.items.forEach(item => {
+            const videoTitle = decodeHTMLEntities(item.snippet.title).toLowerCase();
+            const duration = durationMap[item.snippet.resourceId.videoId];
+            
+            if (duration) {
+              // Convert duration to minutes (PT1H2M10S format)
+              const durationInMinutes = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+              const hours = parseInt(durationInMinutes[1] || 0);
+              const minutes = parseInt(durationInMinutes[2] || 0);
+              const totalMinutes = hours * 60 + minutes;
+              
+              // Check if video is by the searched artist
+              if (videoTitle.includes(artistLower)) {
+                artistSongCount++;
+              }
+              
+              // Check if it's the searched song
+              if (videoTitle.includes(songLower) && videoTitle.includes(artistLower)) {
+                containsSearchedSong = true;
+              }
+              
+              // Only include videos under 10 minutes
+              if (totalMinutes < 10) {
+                validPlaylistItems.push(item);
+              }
+            }
+          });
+        } catch (error) {
+          console.log(`Error checking playlist items: ${error.message}`);
+        }
+        
+        // Calculate relevance score
+        let relevanceScore = 0;
+        let isValid = true;
+        let sizeFactor = 0;  // Initialize sizeFactor here
+        
+        // Check for too many songs by the same artist
+        if (artistSongCount > 20) {
+          isValid = false;
+          console.log(`Skipping playlist: Too many songs (${artistSongCount}) by ${artistName}`);
+        }
+        
+        // Only calculate score if playlist is valid
+        if (isValid) {
+          // Add bonus for containing the searched song
+          if (containsSearchedSong) {
+            relevanceScore += 150;
+            console.log(`Found searched song "${searchedVideoTitle}" in playlist!`);
+          }
+          
+          // Title and description matching
+          if (hasCompleteMatch(title, artistLower)) relevanceScore += 100;
+          if (hasCompleteMatch(title, songLower)) relevanceScore += 80;
+          if (hasCompleteMatch(description, artistLower)) relevanceScore += 30;
+          if (hasCompleteMatch(description, songLower)) relevanceScore += 20;
+          
+          // Type indicators
+          if (title.includes(' similar ')) relevanceScore += 30;
+          if (title.includes(' radio ')) relevanceScore += 25;
+          if (title.includes(' mix ')) relevanceScore += 20;
+          
+          // Calculate size factor
+          const validSize = validPlaylistItems.length;
+          sizeFactor = validSize >= 30 && validSize <= 60 ? 100 :
+                       validSize > 60 && validSize <= 80 ? 50 :
+                       validSize > 80 && validSize <= 100 ? 30 :
+                       validSize > 100 ? 10 :
+                       validSize >= 15 && validSize < 30 ? 40 :
+                       validSize > 0 ? 5 : 0;
+          
+          relevanceScore += sizeFactor;
+        }
+
+        // Log playlist details
+        console.log(`Found playlist: "${playlist.snippet.title}"`);
+        console.log(`  - Total size: ${size} tracks`);
+        console.log(`  - Valid size: ${validPlaylistItems.length} tracks (under 10 minutes)`);
+        console.log(`  - Artist song count: ${artistSongCount}`);
+        console.log(`  - Valid playlist: ${isValid}`);
+        console.log(`  - Score: ${relevanceScore}`);
+        if (isValid) {
+          console.log(`  - Factors: ${[
+            containsSearchedSong ? 'Contains searched song (+150)' : '',
+            hasCompleteMatch(title, artistLower) ? 'Complete artist match in title (+100)' : '',
+            hasCompleteMatch(title, songLower) ? 'Complete song match in title (+80)' : '',
+            hasCompleteMatch(description, artistLower) ? 'Complete artist match in description (+30)' : '',
+            hasCompleteMatch(description, songLower) ? 'Complete song match in description (+20)' : '',
+            title.includes(' similar ') ? 'Similar indicator (+30)' : '',
+            title.includes(' radio ') ? 'Radio indicator (+25)' : '',
+            title.includes(' mix ') ? 'Mix indicator (+20)' : '',
+            `Size factor (+${sizeFactor})`
+          ].filter(Boolean).join(', ')}`);
+        }
+        console.log('---');
+
         return {
           ...playlist,
-          size,
-          isRelevant: 
-            playlist.snippet.title.toLowerCase().includes(artistName.toLowerCase()) ||
-            playlist.snippet.title.toLowerCase().includes("mix") ||
-            playlist.snippet.title.toLowerCase().includes("playlist")
+          size: validPlaylistItems.length,
+          validPlaylistItems,
+          relevanceScore,
+          isValid
         };
       })
     );
 
-    // Sort playlists by relevance and size
-    const sortedPlaylists = playlistsWithSize.sort((a, b) => {
-      // First prioritize relevant playlists
-      if (a.isRelevant && !b.isRelevant) return -1;
-      if (!a.isRelevant && b.isRelevant) return 1;
-      // Then sort by size
-      return b.size - a.size;
-    });
+    // Filter out invalid playlists before sorting
+    const validPlaylists = playlistsWithScore.filter(playlist => playlist.isValid);
+    
+    // Sort only valid playlists by score
+    const sortedPlaylists = validPlaylists.sort((a, b) => 
+      b.relevanceScore - a.relevanceScore
+    );
+
+    if (sortedPlaylists.length === 0) {
+      console.log('No valid playlists found');
+      return [];
+    }
+
+    console.log('\nSelected playlist:', sortedPlaylists[0].snippet.title);
+    console.log('Final score:', sortedPlaylists[0].relevanceScore);
+    console.log('Playlist size:', sortedPlaylists[0].size);
 
     const selectedPlaylist = sortedPlaylists[0];
 
@@ -159,7 +303,7 @@ async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) 
     // Filter and check availability of each video
     const availableRecommendations = [];
     for (const item of playlistItems) {
-      if (availableRecommendations.length >= 20) break; // Increased to 20
+      if (availableRecommendations.length >= 35) break; // Changed to 35
 
       // Decode HTML entities in the title
       const decodedTitle = decodeHTMLEntities(item.snippet.title);
