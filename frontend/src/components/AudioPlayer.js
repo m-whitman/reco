@@ -11,7 +11,7 @@ const AudioPlayer = () => {
     isPlaying,
     progress,
     duration,
-    isBuffering, // Add this
+    isBuffering,
     togglePlayPause,
     seekTo,
     youtubePlayerRef,
@@ -20,6 +20,7 @@ const AudioPlayer = () => {
     playPrevious,
     hasNext,
     hasPrevious,
+    stopPlayback
   } = useAudio();
 
   const progressRef = useRef(null);
@@ -48,6 +49,12 @@ const AudioPlayer = () => {
       return currentSong.url || "#";
     }
     return "#";
+  };
+
+  const handleClose = () => {
+    if (stopPlayback) {
+      stopPlayback();
+    }
   };
 
   if (!currentSong) return null;
@@ -159,6 +166,7 @@ const AudioPlayer = () => {
           videoId={currentSong.id}
           ref={youtubePlayerRef}
           onStateChange={handleYouTubeStateChange}
+          onClose={handleClose}
         />
       )}
     </div>

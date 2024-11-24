@@ -3,6 +3,7 @@ import { AudioProvider } from './AudioProvider';
 
 const AudioContext = createContext({
   isBuffering: false,
+  stopPlayback: () => {},
 });
 
 export { AudioProvider };

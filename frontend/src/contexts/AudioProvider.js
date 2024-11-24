@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import AudioContext from "./AudioContext";
 import { useAudioState } from "./hooks/useAudioState";
 import { useQueueState } from "./hooks/useQueueState";
@@ -33,6 +33,7 @@ export const AudioProvider = ({ children }) => {
           track: audioState.currentSong,
         });
         audioState.setIsPlaying(true);
+        setIsBuffering(false);
         if (!isNaN(duration)) {
           audioState.setDuration(duration);
         }
@@ -42,6 +43,19 @@ export const AudioProvider = ({ children }) => {
           track: audioState.currentSong,
         });
         audioState.setIsPlaying(false);
+        setIsBuffering(false);
+      },
+      onWaiting: () => {
+        logger.info("Spotify track buffering", {
+          track: audioState.currentSong,
+        });
+        setIsBuffering(true);
+      },
+      onPlaying: () => {
+        logger.info("Spotify track resumed", {
+          track: audioState.currentSong,
+        });
+        setIsBuffering(false);
       },
       onEnded: async () => {
         logger.info("Spotify track ended", {
@@ -157,6 +171,19 @@ export const AudioProvider = ({ children }) => {
     }
   };
 
+  const stopPlayback = useCallback(async () => {
+    if (youtube.playerRef.current) {
+      await youtube.stop();
+    }
+    if (spotify.audioRef.current) {
+      await spotify.stop();
+    }
+    audioState.setCurrentSong(null);
+    audioState.setIsPlaying(false);
+    audioState.setProgress(0);
+    audioState.setDuration(0);
+  }, [youtube, spotify, audioState]);
+
   const contextValue = {
     ...audioState,
     isBuffering,
@@ -168,6 +195,7 @@ export const AudioProvider = ({ children }) => {
     playNext: handlePlayNext,
     playPrevious: handlePlayPrevious,
     handleYouTubeStateChange,
+    stopPlayback,
   };
 
   return (

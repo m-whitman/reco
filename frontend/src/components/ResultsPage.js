@@ -24,7 +24,8 @@ function ResultsPage() {
     toggleFavorite, 
     favorites,
     isFavorite,
-    updateQueue
+    updateQueue,
+    stopPlayback
   } = useAudio();
   const { results, error, query } = location.state || {};
 
@@ -70,6 +71,15 @@ function ResultsPage() {
     // Round down to nearest multiple of 3
     const roundedLength = Math.floor(mixed.length / 3) * 3;
     return mixed.slice(0, roundedLength);
+  };
+
+  const handleClosePlayer = () => {
+    if (stopPlayback) {
+      stopPlayback();
+    } else {
+      // Alternative approach if stopPlayback isn't available
+      playSong(null);
+    }
   };
 
   if (error) {
@@ -205,7 +215,7 @@ function ResultsPage() {
         currentSong={currentSong}
         isPlaying={isPlaying}
       />
-      {currentSong && <AudioPlayer />}
+      {currentSong && <AudioPlayer onClose={handleClosePlayer} />}
       <div className={styles.bottomPadding}></div>
     </Layout>
   );
