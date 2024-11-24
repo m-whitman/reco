@@ -94,9 +94,17 @@ async function getPlaylistSize(playlistId) {
 }
 
 async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) {
-  try {
-    console.log(`Searching for YouTube playlist: ${query}`);
+  console.log(`\n🔍 Starting search for: "${searchedVideoTitle}" by ${artistName}`);
+  
+  const musicGenres = [
+    'house', 'techno', 'disco', 'pop', 'rock', 'hip hop', 'rap', 'jazz', 
+    'blues', 'soul', 'r&b', 'funk', 'electronic', 'dance', 'indie', 
+    'alternative', 'metal', 'classical', 'reggae', 'folk', 'country',
+    'ambient', 'trance', 'drum and bass', 'dnb', 'edm', 'synthwave',
+    'lofi', 'lo-fi', 'trap', 'punk', 'grunge'
+  ];
 
+  try {
     const searchResponse = await youtube.search.list({
       part: "snippet",
       q: `${artistName} ${searchedVideoTitle} similar songs playlist`,
@@ -106,12 +114,8 @@ async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) 
     });
 
     const playlists = searchResponse.data.items;
-    if (playlists.length === 0) {
-      console.log("No relevant playlists found");
-      return [];
-    }
+    console.log(`📋 Found ${playlists.length} initial playlists`);
 
-    // Enhanced relevance scoring
     const playlistsWithScore = await Promise.all(
       playlists.map(async (playlist) => {
         const size = await getPlaylistSize(playlist.id.playlistId);
@@ -120,7 +124,6 @@ async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) 
         const artistLower = artistName.toLowerCase();
         const songLower = searchedVideoTitle.toLowerCase();
         
-        // Helper function for complete word matches (moved outside the isValid check)
         const hasCompleteMatch = (text, search) => {
           const searchTerms = search.split(' ');
           return searchTerms.length > 0 && text.includes(` ${search} `);
@@ -139,53 +142,24 @@ async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) 
             key: process.env.YOUTUBE_API_KEY,
           });
           
-          // Get video IDs for duration check
-          const videoIds = playlistItemsResponse.data.items.map(item => 
-            item.snippet.resourceId.videoId
-          );
-          
-          // Get video durations in batch
-          const videosResponse = await youtube.videos.list({
-            part: "contentDetails",
-            id: videoIds.join(','),
-            key: process.env.YOUTUBE_API_KEY,
-          });
-          
-          // Create duration lookup map
-          const durationMap = {};
-          videosResponse.data.items.forEach(video => {
-            durationMap[video.id] = video.contentDetails.duration;
-          });
+          console.log(`\n📊 Analyzing playlist: "${playlist.snippet.title}"`);
           
           playlistItemsResponse.data.items.forEach(item => {
             const videoTitle = decodeHTMLEntities(item.snippet.title).toLowerCase();
-            const duration = durationMap[item.snippet.resourceId.videoId];
             
-            if (duration) {
-              // Convert duration to minutes (PT1H2M10S format)
-              const durationInMinutes = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-              const hours = parseInt(durationInMinutes[1] || 0);
-              const minutes = parseInt(durationInMinutes[2] || 0);
-              const totalMinutes = hours * 60 + minutes;
-              
-              // Check if video is by the searched artist
-              if (videoTitle.includes(artistLower)) {
-                artistSongCount++;
-              }
-              
-              // Check if it's the searched song
-              if (videoTitle.includes(songLower) && videoTitle.includes(artistLower)) {
-                containsSearchedSong = true;
-              }
-              
-              // Only include videos under 10 minutes
-              if (totalMinutes < 10) {
-                validPlaylistItems.push(item);
-              }
+            if (videoTitle.includes(artistLower)) {
+              artistSongCount++;
             }
+            
+            if (videoTitle.includes(songLower) && videoTitle.includes(artistLower)) {
+              containsSearchedSong = true;
+              console.log(`✅ Found original song in playlist`);
+            }
+            
+            validPlaylistItems.push(item);
           });
         } catch (error) {
-          console.log(`Error checking playlist items: ${error.message}`);
+          console.log(`❌ Error checking playlist items: ${error.message}`);
         }
         
         // Calculate relevance score
@@ -201,10 +175,23 @@ async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) 
         
         // Only calculate score if playlist is valid
         if (isValid) {
+          // Add genre scoring BEFORE other scoring calculations
+          musicGenres.forEach(genre => {
+            const genrePattern = new RegExp(`\\b${genre}\\b`, 'i');
+            if (genrePattern.test(title)) {
+              relevanceScore += 20;
+              console.log(`📌 Genre bonus (title): ${genre} (+20) in "${playlist.snippet.title}"`);
+            }
+            if (genrePattern.test(description)) {
+              relevanceScore += 10;
+              console.log(`📌 Genre bonus (description): ${genre} (+10)`);
+            }
+          });
+
           // Add bonus for containing the searched song
           if (containsSearchedSong) {
             relevanceScore += 150;
-            console.log(`Found searched song "${searchedVideoTitle}" in playlist!`);
+            console.log(`Found searched song "${searchedVideoTitle}" in playlist "${playlist.snippet.title}"`);
           }
           
           // Title and description matching
@@ -230,28 +217,6 @@ async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) 
           relevanceScore += sizeFactor;
         }
 
-        // Log playlist details
-        console.log(`Found playlist: "${playlist.snippet.title}"`);
-        console.log(`  - Total size: ${size} tracks`);
-        console.log(`  - Valid size: ${validPlaylistItems.length} tracks (under 10 minutes)`);
-        console.log(`  - Artist song count: ${artistSongCount}`);
-        console.log(`  - Valid playlist: ${isValid}`);
-        console.log(`  - Score: ${relevanceScore}`);
-        if (isValid) {
-          console.log(`  - Factors: ${[
-            containsSearchedSong ? 'Contains searched song (+150)' : '',
-            hasCompleteMatch(title, artistLower) ? 'Complete artist match in title (+100)' : '',
-            hasCompleteMatch(title, songLower) ? 'Complete song match in title (+80)' : '',
-            hasCompleteMatch(description, artistLower) ? 'Complete artist match in description (+30)' : '',
-            hasCompleteMatch(description, songLower) ? 'Complete song match in description (+20)' : '',
-            title.includes(' similar ') ? 'Similar indicator (+30)' : '',
-            title.includes(' radio ') ? 'Radio indicator (+25)' : '',
-            title.includes(' mix ') ? 'Mix indicator (+20)' : '',
-            `Size factor (+${sizeFactor})`
-          ].filter(Boolean).join(', ')}`);
-        }
-        console.log('---');
-
         return {
           ...playlist,
           size: validPlaylistItems.length,
@@ -262,24 +227,29 @@ async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) 
       })
     );
 
-    // Filter out invalid playlists before sorting
+    // Only show the summary table
+    const playlistSummary = playlistsWithScore
+      .sort((a, b) => b.relevanceScore - a.relevanceScore) // Sort by score descending
+      .map(playlist => ({
+        Title: playlist.snippet.title.substring(0, 50) + (playlist.snippet.title.length > 50 ? '...' : ''),
+        Score: playlist.relevanceScore,
+        Size: playlist.size,
+        Valid: playlist.isValid ? '✅' : '❌'
+      }));
+
+    console.table(playlistSummary);
+
     const validPlaylists = playlistsWithScore.filter(playlist => playlist.isValid);
-    
-    // Sort only valid playlists by score
-    const sortedPlaylists = validPlaylists.sort((a, b) => 
-      b.relevanceScore - a.relevanceScore
-    );
+    if (validPlaylists.length === 0) return [];
 
-    if (sortedPlaylists.length === 0) {
-      console.log('No valid playlists found');
-      return [];
-    }
-
-    console.log('\nSelected playlist:', sortedPlaylists[0].snippet.title);
-    console.log('Final score:', sortedPlaylists[0].relevanceScore);
-    console.log('Playlist size:', sortedPlaylists[0].size);
+    // Sort playlists by relevance score
+    const sortedPlaylists = validPlaylists.sort((a, b) => b.relevanceScore - a.relevanceScore);
 
     const selectedPlaylist = sortedPlaylists[0];
+    console.log('\nSelected playlist:');
+    console.log(`- Title: ${selectedPlaylist.snippet.title}`);
+    console.log(`- Score: ${selectedPlaylist.relevanceScore}`);
+    console.log(`- Size: ${selectedPlaylist.size} tracks`);
 
     // Function to normalize video titles for comparison
     const normalizeTitle = (title) => {
@@ -302,8 +272,13 @@ async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) 
 
     // Filter and check availability of each video
     const availableRecommendations = [];
+    console.log(`\n🎵 Fetching recommendations from selected playlist...`);
+    
     for (const item of playlistItems) {
-      if (availableRecommendations.length >= 35) break; // Changed to 35
+      if (availableRecommendations.length >= 35) {
+        console.log(`✨ Reached target of 35 recommendations`);
+        break;
+      }
 
       // Decode HTML entities in the title
       const decodedTitle = decodeHTMLEntities(item.snippet.title);
@@ -333,9 +308,10 @@ async function getYouTubeRecommendations(query, searchedVideoTitle, artistName) 
       }
     }
     
+    console.log(`\n✅ Found ${availableRecommendations.length} valid recommendations`);
     return availableRecommendations;
   } catch (error) {
-    console.error("Error getting YouTube recommendations:", error.message);
+    console.error("❌ Error getting YouTube recommendations:", error.message);
     return [];
   }
 }
