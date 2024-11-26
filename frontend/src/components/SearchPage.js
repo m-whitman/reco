@@ -6,12 +6,15 @@ import Layout from "./Layout";
 import { useAudio } from "../contexts/AudioContext";
 import styles from "./SearchPage.module.css";
 import logo from "../images/reco.jpg";
+import { debounce } from 'lodash';
 
 function SearchPage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { searchHistory, addToSearchHistory } = useAudio();
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const handleSearch = async (searchQuery) => {
     setLoading(true);
@@ -59,6 +62,22 @@ function SearchPage() {
     handleSearch(historyItem);
   };
 
+  const fetchSuggestions = debounce(async (searchTerm) => {
+    if (!searchTerm.trim() || searchTerm.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const response = await axios.get(`/api/search/suggestions?query=${encodeURIComponent(searchTerm)}`);
+      setSuggestions(Array.isArray(response.data) ? response.data : []);
+      setShowSuggestions(true);
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+      setSuggestions([]);
+    }
+  }, 300);
+
   return (
     <Layout>
       <div className={styles.container}>
@@ -80,30 +99,56 @@ function SearchPage() {
         </div>
         <div className={styles.formContainer}>
           <form onSubmit={handleSubmit} className={styles.form}>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search for a song or artist"
-              className={styles.input}
-              disabled={loading}
-            />
-            <button type="submit" className={styles.button} disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader className={`${styles.buttonIcon} ${styles.spinner}`} />
-                  <span>Searching</span>
-                  <span className={styles.loadingDotsContainer}>
-                    <span className={styles.loadingDots}></span>
-                  </span>
-                </>
-              ) : (
-                <>
-                  <Search className={styles.buttonIcon} />
-                  Search
-                </>
+            <div className={styles.searchContainer}>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  fetchSuggestions(e.target.value);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                placeholder="Search for a song or artist"
+                className={styles.input}
+                disabled={loading}
+              />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className={styles.suggestionsContainer}>
+                  {suggestions.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      className={styles.suggestionItem}
+                      onClick={() => {
+                        setQuery(suggestion);
+                        setShowSuggestions(false);
+                        handleSearch(suggestion);
+                      }}
+                    >
+                      <Search size={16} />
+                      {suggestion}
+                    </div>
+                  ))}
+                </div>
               )}
-            </button>
+            </div>
+            <div className={`${styles.buttonContainer} ${showSuggestions && suggestions.length > 0 ? styles.withSuggestions : ''}`}>
+              <button type="submit" className={styles.button} disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader className={`${styles.buttonIcon} ${styles.spinner}`} />
+                    <span>Searching</span>
+                    <span className={styles.loadingDotsContainer}>
+                      <span className={styles.loadingDots}></span>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Search className={styles.buttonIcon} />
+                    Search
+                  </>
+                )}
+              </button>
+            </div>
           </form>
         </div>
         {searchHistory.length > 0 && (

@@ -48,6 +48,26 @@ async function searchAndGetRecommendations(query) {
   }
 }
 
+async function getSuggestions(query) {
+  try {
+    const spotifyAccessToken = await spotifyService.getSpotifyAccessToken();
+    const searchResponse = await spotifyService.searchSpotify(query, spotifyAccessToken);
+
+    const suggestions = [];
+
+    if (searchResponse) {
+      // Only add the full track with artist format
+      suggestions.push(`${searchResponse.name} - ${searchResponse.artist}`);
+    }
+
+    return suggestions;
+  } catch (error) {
+    console.error('Error getting suggestions:', error);
+    return [];
+  }
+}
+
 module.exports = {
   searchAndGetRecommendations,
+  getSuggestions
 };

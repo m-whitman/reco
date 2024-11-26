@@ -28,4 +28,25 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/suggestions", async (req, res) => {
+  const { query } = req.query;
+
+  if (!query) {
+    return res.status(400).json({ error: "Search query is required" });
+  }
+
+  try {
+    const suggestions = await searchService.getSuggestions(query);
+
+    if (suggestions.error) {
+      return res.status(500).json({ error: suggestions.error });
+    }
+
+    res.json(suggestions);
+  } catch (error) {
+    console.error('Error in suggestions endpoint:', error);
+    res.status(500).json({ error: "An error occurred while fetching suggestions" });
+  }
+});
+
 module.exports = router;

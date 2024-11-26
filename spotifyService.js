@@ -63,7 +63,7 @@ async function searchSpotify(query, accessToken) {
 async function getSpotifyRecommendations(trackId, accessToken) {
   try {
     const response = await axios.get(
-      `https://api.spotify.com/v1/recommendations?seed_tracks=${trackId}&limit=45`,
+      `https://api.spotify.com/v1/recommendations?seed_tracks=${trackId}&limit=55`,
       {
         headers: { Authorization: `Bearer ${accessToken}` },
       }
